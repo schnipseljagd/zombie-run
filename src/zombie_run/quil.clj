@@ -42,13 +42,13 @@
 
   ; display player
   (when-let [[x y] (z/player-position game)]
-    (->> (q/rect (width* x) (width* y) width width 2)
+    (->> (q/rect (width* x) (width* y) 20 20 5)
          (q/with-fill [204 255 255])
          (q/with-stroke [0 51 102])))
 
   ; display zombies
   (doseq [[x y] (z/zombie-positions game)]
-    (->> (q/rect (width* x) (width* y) width width 2)
+    (->> (q/rect (width* x) (width* y) 20 20 5)
          (q/with-fill [204 102 0])
          (q/with-stroke [255 0 0]))))
 
