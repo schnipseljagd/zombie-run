@@ -75,8 +75,7 @@
                          (q/no-stroke)                      ; cell border color
                          (q/text-size 20)
 
-                         (let [game @game]
-                           (display-game game)))
+                         (display-game @game))
                  :setup (fn []
                           (q/frame-rate 20))                ; Set FPS
                  :key-pressed (fn []
