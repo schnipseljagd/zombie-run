@@ -54,7 +54,7 @@
 
 (defn tick-game-fn [game]
   (fn []
-    (Thread/sleep 500)
+    (Thread/sleep 100)
     (swap! game z/run-zombie-actions)
     (recur)))
 
