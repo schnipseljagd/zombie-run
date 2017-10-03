@@ -86,8 +86,7 @@
                                 (if (= \newline (q/raw-key))
                                   (reset! game default-game)
                                   (when-let [action (get valid-keys (q/key-as-keyword))]
-                                    (swap! game (fn [game]
-                                                  (z/run-player-action game action))))))
+                                    (swap! game #(z/run-player-action % action)))))
                  :on-close #(stop-interval ticker))))
 
 (comment
