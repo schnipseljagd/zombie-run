@@ -78,8 +78,7 @@
                          (let [game @game]
                            (display-game game)))
                  :setup (fn []
-                          (q/frame-rate 20)                 ; Set FPS
-                          (q/background 200))
+                          (q/frame-rate 20))                ; Set FPS
                  :key-pressed (fn []
                                 (if (= \newline (q/raw-key))
                                   (reset! game default-game)
