@@ -29,19 +29,28 @@
   (* width n))
 
 (defn display-game [game]
+  ; display text
   (if-let [player-health (z/player-health game)]
-    (q/text (format "Health: %s" player-health)
-            (width* 1)
-            (width* 3))
+    (->> (q/text (format "Health: %s" player-health)
+                 (width* 5)
+                 (width* 5)))
+
     (let [[center-x center-y] (z/world-center (:world-size game))]
       (q/text "You are dead!"
               (width* center-x)
               (width* center-y))))
-  (when-let [[x y] (z/player-position game)]
-    (q/rect (width* x) (width* y) width width 2))
 
+  ; display player
+  (when-let [[x y] (z/player-position game)]
+    (->> (q/rect (width* x) (width* y) width width 2)
+         (q/with-fill [204 255 255])
+         (q/with-stroke [0 51 102])))
+
+  ; display zombies
   (doseq [[x y] (z/zombie-positions game)]
-    (q/rect (width* x) (width* y) width width 2)))
+    (->> (q/rect (width* x) (width* y) width width 2)
+         (q/with-fill [204 102 0])
+         (q/with-stroke [255 0 0]))))
 
 (defn tick-game-fn [game]
   (fn []
@@ -49,8 +58,9 @@
     (swap! game z/run-zombie-actions)
     (recur)))
 
-(defn run-zombieland [[world-x world-y]]
-  (let [default-game (z/make-game {:world-size [world-x world-y]})
+(defn run-zombieland []
+  (let [[world-x world-y] [300 150]
+        default-game (z/make-game {:world-size [world-x world-y]})
         game (atom default-game)
         ticker (doto (Thread. (tick-game-fn game))
                  (.setDaemon true)
@@ -59,9 +69,11 @@
                  :size [(width* world-x) (width* world-y)]
                  :title "zombie run"
                  :draw (fn []
-                         (q/background 240)                 ; background color
-                         (q/fill 180)                       ; cell body color
-                         (q/stroke 220)                     ; cell border color
+                         (-> (q/load-image "resources/gridpaperlightbluepattern.png")
+                             (q/background-image))
+                         (q/fill 0 0 0)                     ; cell body color
+                         (q/no-stroke)                      ; cell border color
+                         (q/text-size 20)
 
                          (let [game @game]
                            (display-game game)))
@@ -77,7 +89,7 @@
                  :on-close (fn [] (.interrupt ticker)))))
 
 (comment
-  (run-zombieland [300 150]))
+  (run-zombieland))
 
 (defn -main []
-  (run-zombieland [30 30]))
+  (run-zombieland))
