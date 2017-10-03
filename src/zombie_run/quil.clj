@@ -29,9 +29,14 @@
   (* width n))
 
 (defn display-game [game]
-  (q/text (format "Health: %s" (z/player-health game))
-          (width* 1)
-          (width* 3))
+  (if-let [player-health (z/player-health game)]
+    (q/text (format "Health: %s" player-health)
+            (width* 1)
+            (width* 3))
+    (let [[center-x center-y] (z/world-center (:world-size game))]
+      (q/text "You are dead!"
+              (width* center-x)
+              (width* center-y))))
   (when-let [[x y] (z/player-position game)]
     (q/rect (width* x) (width* y) width width 2))
 
@@ -44,13 +49,14 @@
     (swap! game z/run-zombie-actions)
     (recur)))
 
-(defn run-zombieland [size]
-  (let [game (atom (z/make-game {:world-size [size size]}))
+(defn run-zombieland [[world-x world-y]]
+  (let [default-game (z/make-game {:world-size [world-x world-y]})
+        game (atom default-game)
         ticker (doto (Thread. (tick-game-fn game))
                  (.setDaemon true)
                  (.start))]
     (q/defsketch zombie-run
-                 :size [(width* size) (width* size)]
+                 :size [(width* world-x) (width* world-y)]
                  :title "zombie run"
                  :draw (fn []
                          (q/background 240)                 ; background color
@@ -58,20 +64,20 @@
                          (q/stroke 220)                     ; cell border color
 
                          (let [game @game]
-                             (display-game game)))
+                           (display-game game)))
                  :setup (fn []
                           (q/frame-rate 20)                 ; Set FPS
                           (q/background 200))
                  :key-pressed (fn []
                                 (if (= \newline (q/raw-key))
-                                  (reset! game (z/make-game {:world-size [size size]}))
+                                  (reset! game default-game)
                                   (when-let [action (get valid-keys (q/key-as-keyword))]
                                     (swap! game (fn [game]
                                                   (z/run-player-action game action))))))
                  :on-close (fn [] (.interrupt ticker)))))
 
 (comment
-  (run-zombieland 30))
+  (run-zombieland [300 150]))
 
 (defn -main []
-  (run-zombieland 30))
+  (run-zombieland [30 30]))
