@@ -52,19 +52,23 @@
          (q/with-fill [204 102 0])
          (q/with-stroke [255 0 0]))))
 
-(defn tick-game-fn [game]
-  (fn []
-    (Thread/sleep 100)
-    (swap! game z/run-zombie-actions)
-    (recur)))
+(defn start-interval [fn interval]
+  (doto (Thread. #(try
+                    (while (not (.isInterrupted (Thread/currentThread)))
+                      (Thread/sleep interval)
+                      (fn))
+                    (catch InterruptedException _)))
+    (.setDaemon true)
+    (.start)))
+
+(defn stop-interval [ticker]
+  (.interrupt ticker))
 
 (defn run-zombieland []
   (let [[world-x world-y] [300 150]
         default-game (z/make-game {:world-size [world-x world-y]})
         game (atom default-game)
-        ticker (doto (Thread. (tick-game-fn game))
-                 (.setDaemon true)
-                 (.start))]
+        ticker (start-interval #(swap! game z/run-zombie-actions) 100)]
     (q/defsketch zombie-run
                  :size [(width* world-x) (width* world-y)]
                  :title "zombie run"
@@ -84,7 +88,7 @@
                                   (when-let [action (get valid-keys (q/key-as-keyword))]
                                     (swap! game (fn [game]
                                                   (z/run-player-action game action))))))
-                 :on-close (fn [] (.interrupt ticker)))))
+                 :on-close #(stop-interval ticker))))
 
 (comment
   (run-zombieland))
