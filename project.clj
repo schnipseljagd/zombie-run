@@ -1,4 +1,4 @@
-(defproject snake "0.1.0-SNAPSHOT"
+(defproject zombie-run "0.1.0-SNAPSHOT"
   :description "A simple zombie shooter"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}

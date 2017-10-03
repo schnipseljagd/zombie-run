@@ -1,10 +1,15 @@
-# snake
+# Zombie Run
 
-A Clojure library designed to ... well, that part is up to you.
+A simple zombie shooter
 
 ## Usage
 
-FIXME
+    lein uberjar
+    java -jar target/zombie-run-0.1.0-SNAPSHOT-standalone.jar
+
+## Tests
+
+    lein tests
 
 ## License
 

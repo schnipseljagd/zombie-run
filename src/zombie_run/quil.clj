@@ -49,9 +49,9 @@
         ticker (doto (Thread. (tick-game-fn game))
                  (.setDaemon true)
                  (.start))]
-    (q/defsketch zombieland
+    (q/defsketch zombie-run
                  :size [(width* size) (width* size)]
-                 :title "world of snake"
+                 :title "zombie run"
                  :draw (fn []
                          (q/background 240)                 ; background color
                          (q/fill 180)                       ; cell body color
