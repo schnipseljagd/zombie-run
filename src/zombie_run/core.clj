@@ -1,8 +1,40 @@
 (ns zombie-run.core
   (:require [clj-time.core :as t]
-            [clojure.set :refer [rename-keys]]))
+            [clj-time.spec :as time-spec]
+            [clojure.set :refer [rename-keys]]
+            [clojure.spec.alpha :as s]))
 
-(def player-actions #{:left :right :up :down :up-left :up-right :down-left :down-right :fire})
+(s/def ::position (s/tuple int? int?))
+
+(s/def ::weapon-type #{:dagger :musket :zombie-fist})
+(s/def ::range int?)
+(s/def ::attack int?)
+(s/def ::recharge-delay number?)
+(s/def ::last-attack ::time-spec/date-time)
+(s/def ::weapon (s/keys :req-un [::weapon-type
+                                 ::range
+                                 ::attack
+                                 ::recharge-delay
+                                 ::last-attack]))
+
+(s/def ::type #{:zombie :player})
+(s/def ::direction #{:left :right :up :down :up-left :up-right :down-left :down-right})
+(s/def ::health int?)
+
+(s/def ::character (s/keys :req-un [::type
+                                    ::direction
+                                    ::health
+                                    ::weapon]))
+
+(s/def ::world-size ::position)
+(s/def ::terrain (s/map-of ::position ::character))
+(s/def ::player-pos ::position)
+
+(s/def ::game (s/keys :req-un [::world-size
+                               ::terrain
+                               ::player-pos]))
+
+(s/def ::player-action (conj (s/describe ::direction) :fire))
 
 (defn world-center [[x y]]
   [(int (/ x 2)) (int (/ y 2))])
@@ -88,7 +120,7 @@
 (defn make-weapon
   ([type]
    (assert (contains? weapons type) "Weapon doesn't exist.")
-   (assoc (get weapons type) :type type)))
+   (assoc (get weapons type) :weapon-type type)))
 
 (defn weapon-is-ready? [{last-attack :last-attack recharge-delay :recharge-delay}]
   (let [available (t/plus last-attack (t/seconds recharge-delay))
@@ -161,7 +193,6 @@
           (range 1 (inc (weapon-range (get-in terrain [player-pos :weapon]))))))
 
 (defn run-player-action [game player-action]
-  (assert (contains? player-actions player-action))
   (if (= :fire player-action)
     (player-attack game)
     (move-player game player-action)))
@@ -242,3 +273,14 @@
                         (world-right-upper-corner world-size)]))
       (set-player (or player-pos (world-center world-size)))))
 
+(s/fdef make-game
+        :ret ::game)
+
+(s/fdef run-player-action
+        :args (s/cat :game ::game
+                     :player-action ::player-action)
+        :ret ::game)
+
+(s/fdef run-zombie-actions
+        :args (s/cat :game ::game)
+        :ret ::game)

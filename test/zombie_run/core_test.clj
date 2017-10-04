@@ -1,6 +1,11 @@
 (ns zombie-run.core-test
   (:require [clojure.test :refer :all]
+            [clojure.spec.test.alpha :as stest]
             [zombie-run.core :refer :all]))
+
+(stest/instrument [`run-zombie-actions
+                   `run-player-action
+                   `make-game])
 
 (defn example-game []
   (make-game {:player-pos [2 3]
@@ -131,4 +136,10 @@
     (let [game (-> (example-game)
                    (run-zombie-actions)
                    (run-zombie-actions))]
-         (is (= 6 (player-health game))))))
+      (is (= 6 (player-health game))))))
+
+(deftest invalid-args-test
+  (are [fn] (thrown? clojure.lang.ExceptionInfo (fn))
+            #(run-player-action (example-game) :foo)
+            #(run-player-action {} :fire)
+            #(run-zombie-actions {})))
