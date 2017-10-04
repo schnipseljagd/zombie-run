@@ -115,6 +115,8 @@
 ;;
 ;; player
 ;;
+(def player-default-health 10)
+
 (defn player-health [{terrain :terrain pos :player-pos}]
   (get-in terrain [pos :health]))
 
@@ -139,7 +141,7 @@
                               (-> (rename-keys terrain {old-pos position})
                                   (update position set-terrain-direction direction))
                               (assoc terrain position (-> (make-terrain :player)
-                                                          (assoc :health 10)
+                                                          (assoc :health player-default-health)
                                                           (assoc :weapon (make-weapon :dagger))
                                                           (set-terrain-direction direction))))))))))
 
@@ -167,6 +169,8 @@
 ;;
 ;; zombie
 ;;
+(def zombie-default-health 10)
+
 (defn configure-zombie-weapon [game pos overrides]
   (update-in game [:terrain pos :weapon] merge overrides))
 
@@ -224,7 +228,7 @@
 
 (defn set-zombie [game position]
   (assoc-in game [:terrain position] (-> (make-terrain :zombie)
-                                         (assoc :health 10)
+                                         (assoc :health zombie-default-health)
                                          (assoc :weapon (make-weapon :zombie-fist)))))
 
 (defn set-zombies [game zombie-positions]
