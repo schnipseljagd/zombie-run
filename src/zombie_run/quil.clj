@@ -1,7 +1,8 @@
 (ns zombie-run.quil
   (:gen-class)
   (:require [quil.core :as q]
-            [zombie-run.core :as z])
+            [zombie-run.core :as z]
+            [util.interval :as interval])
   (:import (java.awt.event KeyEvent)))
 
 (def valid-keys {;; arrows
@@ -88,23 +89,11 @@
                               (z/zombie-health game pos)
                               z/zombie-default-health)))
 
-(defn start-interval [fn interval]
-  (doto (Thread. #(try
-                    (while (not (.isInterrupted (Thread/currentThread)))
-                      (Thread/sleep interval)
-                      (fn))
-                    (catch InterruptedException _)))
-    (.setDaemon true)
-    (.start)))
-
-(defn stop-interval [ticker]
-  (.interrupt ticker))
-
 (defn run-zombieland []
   (let [[world-x world-y] [300 150]
         default-game (z/make-game {:world-size [world-x world-y]})
         game (atom default-game)
-        ticker (start-interval #(swap! game z/run-zombie-actions) 100)]
+        ticker (interval/start #(swap! game z/run-zombie-actions) 100)]
 
     (q/defsketch zombie-run
                  :size [(width* world-x) (width* world-y)]
@@ -120,7 +109,7 @@
                                           (boolean (key->action)))]
                                   (cond (key-newline?) (reset! game default-game)
                                         (key-has-action?) (swap! game #(z/run-player-action % (key->action))))))
-                 :on-close #(stop-interval ticker))))
+                 :on-close #(interval/stop ticker))))
 
 (comment
   (run-zombieland))
