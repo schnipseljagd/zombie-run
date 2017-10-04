@@ -49,6 +49,12 @@
        (q/with-fill [204 102 0])
        (q/with-stroke [255 0 0])))
 
+(defn display-centered-text [game text]
+  (let [[center-x center-y] (z/world-center (:world-size game))]
+    (q/text text
+            (width* center-x)
+            (width* center-y))))
+
 (defn display-game [game]
   (-> (q/load-image "resources/gridpaperlightbluepattern.png")
       (q/background-image))                                 ; background image
@@ -62,15 +68,11 @@
                  (width* 5)
                  (width* 5)))
     (let [[center-x center-y] (z/world-center (:world-size game))]
-      (q/text "You are dead!"
-              (width* center-x)
-              (width* center-y))))
+      (display-centered-text game "You are dead!")))
 
   (when (empty? (z/zombie-positions game))
     (let [[center-x center-y] (z/world-center (:world-size game))]
-      (q/text "You survived!"
-              (width* center-x)
-              (width* center-y))))
+      (display-centered-text game "You survived!")))
 
   ; display player
   (when-let [pos (z/player-position game)]
