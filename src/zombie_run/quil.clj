@@ -61,9 +61,14 @@
     (->> (q/text (format "Health: %s" player-health)
                  (width* 5)
                  (width* 5)))
-
     (let [[center-x center-y] (z/world-center (:world-size game))]
       (q/text "You are dead!"
+              (width* center-x)
+              (width* center-y))))
+
+  (when (empty? (z/zombie-positions game))
+    (let [[center-x center-y] (z/world-center (:world-size game))]
+      (q/text "You survived!"
               (width* center-x)
               (width* center-y))))
 
