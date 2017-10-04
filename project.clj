@@ -4,7 +4,7 @@
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0-beta1"]
                  [clj-time "0.14.0"]
-                 [quil "2.5.0"]]
+                 [quil "2.6.0"]]
 
   :profiles {:uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]
