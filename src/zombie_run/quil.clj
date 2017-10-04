@@ -14,6 +14,10 @@
                  :a     :left
                  :w     :up
                  :s     :down
+                 :e     :up-right
+                 :q     :up-left
+                 :z     :down-left
+                 :x     :down-right
                  ;; vim
                  :l     :right
                  :h     :left
@@ -94,16 +98,21 @@
         default-game (z/make-game {:world-size [world-x world-y]})
         game (atom default-game)
         ticker (start-interval #(swap! game z/run-zombie-actions) 100)]
+
     (q/defsketch zombie-run
                  :size [(width* world-x) (width* world-y)]
                  :title "zombie run"
                  :draw #(display-game @game)
                  :setup #(q/frame-rate 20)
                  :key-pressed (fn []
-                                (if (= \newline (q/raw-key))
-                                  (reset! game default-game)
-                                  (when-let [action (get valid-keys (q/key-as-keyword))]
-                                    (swap! game #(z/run-player-action % action)))))
+                                (letfn [(key-newline? []
+                                          (= \newline (q/raw-key)))
+                                        (key->action []
+                                          (get valid-keys (q/key-as-keyword)))
+                                        (key-has-action? []
+                                          (boolean (key->action)))]
+                                  (cond (key-newline?) (reset! game default-game)
+                                        (key-has-action?) (swap! game #(z/run-player-action % (key->action))))))
                  :on-close #(stop-interval ticker))))
 
 (comment
