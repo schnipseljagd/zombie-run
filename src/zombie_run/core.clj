@@ -7,10 +7,9 @@
 (s/def ::position (s/tuple (s/int-in 0 500) (s/int-in 0 500)))
 
 (s/def ::weapon-type #{:dagger :musket :zombie-fist})
-(s/def ::range pos-int?)
+(s/def ::range (s/int-in 1 1000))
 (s/def ::attack pos-int?)
-(s/def ::recharge-delay (s/double-in 0 1000 :infinite? false
-                                            :NaN? false))
+(s/def ::recharge-delay (s/int-in 0 (* 1000 1000)))
 (s/def ::last-attack ::time-spec/date-time)
 (s/def ::weapon (s/keys :req-un [::weapon-type
                                  ::range
@@ -34,8 +33,7 @@
 (s/def ::game (s/keys :req-un [::world-size
                                ::terrain]))
 
-(s/def ::player-action (s/with-gen (conj (s/describe ::direction) :fire)
-                                   #(s/gen (s/describe ::direction))))
+(s/def ::player-action (conj (s/describe ::direction) :fire))
 
 (s/def ::player-pos ::position)
 (s/def ::zombies (s/coll-of ::position :distinct true))
@@ -117,17 +115,17 @@
 (def weapons {; player weapons
               :dagger      {:range          1
                             :attack         1
-                            :recharge-delay 0.2
+                            :recharge-delay 200
                             :last-attack    no-last-attack}
               :musket      {:range          4
                             :attack         4
-                            :recharge-delay 2.
+                            :recharge-delay 2000
                             :last-attack    no-last-attack}
 
               ; zombie weapon
               :zombie-fist {:range          1
                             :attack         2
-                            :recharge-delay 2.
+                            :recharge-delay 2000
                             :last-attack    no-last-attack}})
 
 (defn make-weapon
@@ -136,7 +134,7 @@
    (assoc (get weapons type) :weapon-type type)))
 
 (defn- weapon-is-ready? [{last-attack :last-attack recharge-delay :recharge-delay}]
-  (let [available (t/plus last-attack (t/seconds recharge-delay))
+  (let [available (t/plus last-attack (t/millis recharge-delay))
         now (t/now)]
     (or (t/after? now available)
         (t/equal? now available))))
