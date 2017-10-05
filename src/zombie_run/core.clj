@@ -80,9 +80,13 @@
 
 (defn- attack-target [terrain attacker-pos target-pos target-type]
   (if (weapon/weapon-is-ready? (get-in terrain [attacker-pos :weapon]))
-    (let [terrain (update-in terrain [attacker-pos :weapon] weapon/weapon-reset-recharge)]
+    (let [terrain (update-in terrain
+                             [attacker-pos :weapon]
+                             weapon/weapon-reset-recharge)]
       (if (terrain-has-type? terrain target-pos target-type)
-        (damage-terrain terrain target-pos (weapon/weapon-attack (get-in terrain [attacker-pos :weapon])))
+        (damage-terrain terrain
+                        target-pos
+                        (weapon/weapon-attack (get-in terrain [attacker-pos :weapon])))
         terrain))
     terrain))
 
