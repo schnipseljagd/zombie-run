@@ -4,8 +4,10 @@
             [clojure.set :refer [rename-keys]]
             [clojure.spec.alpha :as s]))
 
-(s/def ::position (s/tuple (s/int-in 0 500) (s/int-in 0 500)))
-
+;;
+;; schema
+;;
+; weapon
 (s/def ::weapon-type #{:dagger :musket :zombie-fist})
 (s/def ::range (s/int-in 1 1000))
 (s/def ::attack pos-int?)
@@ -17,27 +19,33 @@
                                  ::recharge-delay
                                  ::last-attack]))
 
+; character (zombie, player)
 (s/def ::type #{:zombie :player})
 (s/def ::direction #{:left :right :up :down :up-left :up-right :down-left :down-right})
 (s/def ::health int?)
-
 (s/def ::character (s/keys :req-un [::type
                                     ::direction
                                     ::health
                                     ::weapon]))
 
+; game
+(s/def ::position (s/tuple (s/int-in 0 500) (s/int-in 0 500)))
 (s/def ::world-size ::position)
 (s/def ::terrain (s/map-of ::position ::character
                            :min-count 1))
-
 (s/def ::game (s/keys :req-un [::world-size
                                ::terrain]))
 
-(s/def ::player-action (conj (s/describe ::direction) :fire))
-
+; make-game
 (s/def ::player-pos ::position)
 (s/def ::zombies (s/coll-of ::position :distinct true))
 
+; run-player-action
+(s/def ::player-action (conj (s/describe ::direction) :fire))
+
+;;
+;; world
+;;
 (defn world-center [[x y]]
   [(int (/ x 2)) (int (/ y 2))])
 
@@ -278,6 +286,9 @@
                         (world-right-upper-corner world-size)]))
       (set-player (or player-pos (world-center world-size)))))
 
+;;
+;; function specs
+;;
 (s/fdef make-game
         :args (s/cat :x (s/keys :req-un [::world-size]
                                 :opt-un [::player-pos
