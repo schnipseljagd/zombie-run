@@ -3,9 +3,7 @@
             [clojure.spec.test.alpha :as stest]
             [zombie-run.core :refer :all]))
 
-(stest/instrument [`run-zombie-actions
-                   `run-player-action
-                   `make-game])
+(stest/instrument (stest/enumerate-namespace 'zombie-run.core))
 
 (defn example-game []
   (make-game {:player-pos [2 3]
