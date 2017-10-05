@@ -8,4 +8,5 @@
 
   :profiles {:uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]
-                       :main zombie-run.quil}})
+                       :main zombie-run.quil}
+             :dev {:dependencies [[org.clojure/test.check "0.9.0"]]}})

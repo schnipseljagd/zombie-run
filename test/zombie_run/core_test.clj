@@ -138,8 +138,9 @@
                    (run-zombie-actions))]
       (is (= 6 (player-health game))))))
 
-(deftest invalid-args-test
-  (are [fn] (thrown? clojure.lang.ExceptionInfo (fn))
-            #(run-player-action (example-game) :foo)
-            #(run-player-action {} :fire)
-            #(run-zombie-actions {})))
+(deftest check-specs-test
+  (doseq [report (stest/check (stest/enumerate-namespace 'zombie-run.core))]
+    (let [result (get-in report [:clojure.spec.test.check/ret :result])]
+      (when-not (true? result)
+        (prn (:failure report)))
+      (is (true? result)))))
