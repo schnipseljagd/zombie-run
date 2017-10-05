@@ -21,7 +21,7 @@
         dist (Math/sqrt (+ x-dist y-dist))]
     (int dist)))
 
-(defn calc-position [[x y] action steps]
+(defn- calc-position [[x y] action steps]
   (case action
     :right [(+ x steps) y]
     :left [(- x steps) y]
