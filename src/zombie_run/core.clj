@@ -173,9 +173,6 @@
 (defn player-health [{terrain :terrain :as game}]
   (get-in terrain [(player-position game) :health]))
 
-(defn player-direction [{terrain :terrain :as game}]
-  (get-in terrain [(player-position game) :direction]))
-
 (defn configure-player-weapon [game overrides]
   (update-in game [:terrain (player-position game) :weapon] merge overrides))
 
@@ -191,7 +188,9 @@
 
 (defn- player-attack [{terrain :terrain :as game} player-pos]
   (reduce (fn [game counter]
-            (let [target-pos (get-position player-pos (player-direction game) counter)]
+            (let [target-pos (get-position player-pos
+                                           (get-in terrain [player-pos :direction])
+                                           counter)]
               (update game :terrain attack-target player-pos target-pos :zombie)))
           game
           (range 1 (inc (weapon-range (get-in terrain [player-pos :weapon]))))))
