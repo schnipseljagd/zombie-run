@@ -62,6 +62,14 @@
                    (player-fire-times 10))]
       (is (nil? (zombie-health game [1 2])))))
 
+  (testing "zombie dies even if the damage bigger than the existing health"
+    (let [game (-> (example-game)
+                   (set-player [2 3] :up-left)
+                   (configure-player-weapon (make-weapon :musket))
+                   (configure-player-weapon {:recharge-delay 0})
+                   (player-fire-times 10))]
+      (is (nil? (zombie-health game [1 2])))))
+
   (testing "player weapon has a recharge delay"
     (let [game (-> (example-game)
                    (set-player [2 3] :up-left)

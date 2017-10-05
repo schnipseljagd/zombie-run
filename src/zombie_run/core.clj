@@ -72,7 +72,7 @@
 (defn- damage-terrain [terrain target attack]
   (if-let [health (get-in terrain [target :health])]
     (let [new-health (- health attack)]
-      (if (zero? new-health)
+      (if (>= 0 new-health)
         (dissoc terrain target)
         (assoc-in terrain [target :health] new-health)))
     (throw (ex-info "Terrain cannot be damaged."
