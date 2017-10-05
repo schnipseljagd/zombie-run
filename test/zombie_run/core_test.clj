@@ -59,21 +59,21 @@
   (testing "player attack kills a zombie"
     (let [game (-> (example-game)
                    (set-player [2 3] :up-left)
-                   (configure-player-weapon {:recharge-delay 0})
+                   (configure-player-weapon {:recharge-delay 0.})
                    (player-fire-times 10))]
       (is (nil? (zombie-health game [1 2])))))
 
   (testing "player weapon has a recharge delay"
     (let [game (-> (example-game)
                    (set-player [2 3] :up-left)
-                   (configure-player-weapon {:recharge-delay 10})
+                   (configure-player-weapon {:recharge-delay 10.})
                    (player-fire-times 10))]
       (is (= 9 (zombie-health game [1 2])))))
 
   (testing "player weapon recharges also if it doesn't hit"
     (let [game (-> (example-game)
                    (set-player [3 4] :up-left)
-                   (configure-player-weapon {:recharge-delay 10})
+                   (configure-player-weapon {:recharge-delay 10.})
                    (run-player-action :fire)
                    (run-player-action :up-left)
                    (player-fire-times 10))]
@@ -126,8 +126,8 @@
 
   (testing "zombies kill the player"
     (let [game (-> (example-game)
-                   (configure-zombie-weapon [1 2] {:recharge-delay 0})
-                   (configure-zombie-weapon [0 2] {:recharge-delay 0})
+                   (configure-zombie-weapon [1 2] {:recharge-delay 0.})
+                   (configure-zombie-weapon [0 2] {:recharge-delay 0.})
                    (step-times 6))]
       (is (nil? (player-health game)))
       (is (nil? (player-position game)))))

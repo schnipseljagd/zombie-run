@@ -4,12 +4,13 @@
             [clojure.set :refer [rename-keys]]
             [clojure.spec.alpha :as s]))
 
-(s/def ::position (s/tuple int? int?))
+(s/def ::position (s/tuple (s/int-in 0 500) (s/int-in 0 500)))
 
 (s/def ::weapon-type #{:dagger :musket :zombie-fist})
-(s/def ::range int?)
-(s/def ::attack int?)
-(s/def ::recharge-delay number?)
+(s/def ::range pos-int?)
+(s/def ::attack pos-int?)
+(s/def ::recharge-delay (s/double-in 0 1000 :infinite? false
+                                            :NaN? false))
 (s/def ::last-attack ::time-spec/date-time)
 (s/def ::weapon (s/keys :req-un [::weapon-type
                                  ::range
@@ -27,12 +28,17 @@
                                     ::weapon]))
 
 (s/def ::world-size ::position)
-(s/def ::terrain (s/map-of ::position ::character :min-count 1))
+(s/def ::terrain (s/map-of ::position ::character
+                           :min-count 1))
 
 (s/def ::game (s/keys :req-un [::world-size
                                ::terrain]))
 
-(s/def ::player-action (conj (s/describe ::direction) :fire))
+(s/def ::player-action (s/with-gen (conj (s/describe ::direction) :fire)
+                                   #(s/gen (s/describe ::direction))))
+
+(s/def ::player-pos ::position)
+(s/def ::zombies (s/coll-of ::position :distinct true))
 
 (defn world-center [[x y]]
   [(int (/ x 2)) (int (/ y 2))])
@@ -115,13 +121,13 @@
                             :last-attack    no-last-attack}
               :musket      {:range          4
                             :attack         4
-                            :recharge-delay 2
+                            :recharge-delay 2.
                             :last-attack    no-last-attack}
 
               ; zombie weapon
               :zombie-fist {:range          1
                             :attack         2
-                            :recharge-delay 2
+                            :recharge-delay 2.
                             :last-attack    no-last-attack}})
 
 (defn make-weapon
@@ -276,6 +282,9 @@
       (set-player (or player-pos (world-center world-size)))))
 
 (s/fdef make-game
+        :args (s/cat :x (s/keys :req-un [::world-size]
+                                :opt-un [::player-pos
+                                         ::zombies]))
         :ret ::game)
 
 (s/fdef run-player-action
