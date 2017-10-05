@@ -1,7 +1,7 @@
 (ns zombie-run.spec-check
   (:require [clojure.test :refer :all]
             [clojure.spec.test.alpha :as stest]
-            [zombie-run.core :refer :all]))
+            [zombie-run.core]))
 
 (def symbols-under-test (stest/enumerate-namespace 'zombie-run.core))
 

@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [quil.core :as q]
             [zombie-run.core :as z]
+            [zombie-run.world :as w]
             [util.interval :as interval])
   (:import (java.awt.event KeyEvent)))
 
@@ -51,7 +52,7 @@
        (q/with-stroke [255 0 0])))
 
 (defn display-centered-text [game text]
-  (let [[center-x center-y] (z/world-center (:world-size game))]
+  (let [[center-x center-y] (w/world-center (:world-size game))]
     (q/text text
             (width* center-x)
             (width* center-y))))
@@ -68,11 +69,11 @@
     (->> (q/text (format "Health: %s" player-health)
                  (width* 5)
                  (width* 5)))
-    (let [[center-x center-y] (z/world-center (:world-size game))]
+    (let [[center-x center-y] (w/world-center (:world-size game))]
       (display-centered-text game "You are dead!")))
 
   (when (empty? (z/zombie-positions game))
-    (let [[center-x center-y] (z/world-center (:world-size game))]
+    (let [[center-x center-y] (w/world-center (:world-size game))]
       (display-centered-text game "You survived!")))
 
   ; display player

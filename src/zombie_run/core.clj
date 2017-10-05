@@ -2,7 +2,8 @@
   (:require [clj-time.core :as t]
             [clj-time.spec :as time-spec]
             [clojure.set :refer [rename-keys]]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [zombie-run.world :as world]))
 
 ;;
 ;; schema
@@ -44,44 +45,6 @@
 (s/def ::player-action (conj (s/describe ::direction) :fire))
 
 ;;
-;; world
-;;
-(defn world-center [[x y]]
-  [(int (/ x 2)) (int (/ y 2))])
-
-(defn world-left-upper-corner [[_ y]]
-  [0 y])
-
-(defn world-right-upper-corner [[x _]]
-  [x 0])
-
-(defn- in-world? [[world-x world-y] [x y]]
-  (and (>= x 0)
-       (>= y 0)
-       (< x world-x)
-       (< y world-y)))
-
-(defn- get-position
-  ([pos action] (get-position pos action 1))
-  ([[x y] action steps]
-   (case action
-     :right [(+ x steps) y]
-     :left [(- x steps) y]
-     :up [x (- y steps)]
-     :up-left [(- x steps) (- y steps)]
-     :up-right [(+ x steps) (- y steps)]
-     :down [x (+ y steps)]
-     :down-left [(- x steps) (+ y steps)]
-     :down-right [(+ x steps) (+ y steps)]
-     [x y])))
-
-(defn- distance [[a-x a-y] [b-x b-y]]
-  (let [x-dist (Math/pow (- a-x b-x) 2)
-        y-dist (Math/pow (- a-y b-y) 2)
-        dist (Math/sqrt (+ x-dist y-dist))]
-    (int dist)))
-
-;;
 ;; terrain
 ;;
 (defn make-terrain [type]
@@ -98,9 +61,8 @@
   (not (contains? terrain pos)))
 
 (defn- move-terrain [terrain current-pos action world-size]
-  (let [new-pos (get-position current-pos action)]
-    (if (and (in-world? world-size new-pos)
-             (terrain-accessible? terrain new-pos))
+  (let [new-pos (world/get-position world-size current-pos action)]
+    (if (terrain-accessible? terrain new-pos)
       (-> terrain
           (clojure.set/rename-keys {current-pos new-pos})
           (update new-pos set-terrain-direction action))
@@ -151,7 +113,7 @@
 
 (defn- in-weapon-range? [terrain attacker-pos target-pos]
   (= (weapon-range (get-in terrain [attacker-pos :weapon]))
-     (distance attacker-pos target-pos)))
+     (world/measure-distance attacker-pos target-pos)))
 
 (defn- weapon-attack [{attack :attack}] attack)
 
@@ -192,11 +154,12 @@
                                         (assoc :weapon (make-weapon :dagger))
                                         (set-terrain-direction direction))))))
 
-(defn- player-attack [{terrain :terrain :as game} player-pos]
+(defn- player-attack [{terrain :terrain world-size :world-size :as game} player-pos]
   (reduce (fn [game counter]
-            (let [target-pos (get-position player-pos
-                                           (get-in terrain [player-pos :direction])
-                                           counter)]
+            (let [target-pos (world/get-position world-size
+                                                 player-pos
+                                                 (get-in terrain [player-pos :direction])
+                                                 counter)]
               (update game :terrain attack-target player-pos target-pos :zombie)))
           game
           (range 1 (inc (weapon-range (get-in terrain [player-pos :weapon]))))))
@@ -282,9 +245,9 @@
   (-> {:world-size world-size
        :terrain    {}}
       (set-zombies (or zombies
-                       [(world-left-upper-corner world-size)
-                        (world-right-upper-corner world-size)]))
-      (set-player (or player-pos (world-center world-size)))))
+                       [(world/world-left-upper-corner world-size)
+                        (world/world-right-upper-corner world-size)]))
+      (set-player (or player-pos (world/world-center world-size)))))
 
 ;;
 ;; function specs
