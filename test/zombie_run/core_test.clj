@@ -1,9 +1,9 @@
 (ns zombie-run.core-test
   (:require [clojure.test :refer :all]
-            [clojure.spec.test.alpha :as stest]
+            [zombie-run.spec-check :refer [instrument-function-specs]]
             [zombie-run.core :refer :all]))
 
-(stest/instrument (stest/enumerate-namespace 'zombie-run.core))
+(instrument-function-specs)
 
 (defn example-game []
   (make-game {:player-pos [2 3]
@@ -135,10 +135,3 @@
                    (run-zombie-actions)
                    (run-zombie-actions))]
       (is (= 6 (player-health game))))))
-
-(deftest check-specs-test
-  (doseq [report (stest/check (stest/enumerate-namespace 'zombie-run.core))]
-    (let [result (get-in report [:clojure.spec.test.check/ret :result])]
-      (when-not (true? result)
-        (prn (:failure report)))
-      (is (true? result)))))
