@@ -6,6 +6,8 @@
                  [clj-time "0.14.0"]
                  [quil "2.6.0"]]
 
+  :monkeypatch-clojure-test false ; See https://github.com/technomancy/leiningen/issues/2173
+
   :profiles {:uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]
                        :main zombie-run.quil}
