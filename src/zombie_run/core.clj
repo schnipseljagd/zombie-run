@@ -27,12 +27,10 @@
                                     ::weapon]))
 
 (s/def ::world-size ::position)
-(s/def ::terrain (s/map-of ::position ::character))
-(s/def ::player-pos ::position)
+(s/def ::terrain (s/map-of ::position ::character :min-count 1))
 
 (s/def ::game (s/keys :req-un [::world-size
-                               ::terrain
-                               ::player-pos]))
+                               ::terrain]))
 
 (s/def ::player-action (conj (s/describe ::direction) :fire))
 
@@ -86,6 +84,15 @@
 
 (defn- terrain-accessible? [terrain pos]
   (not (contains? terrain pos)))
+
+(defn- move-terrain [terrain current-pos action world-size]
+  (let [new-pos (get-position current-pos action)]
+    (if (and (in-world? world-size new-pos)
+             (terrain-accessible? terrain new-pos))
+      (-> terrain
+          (clojure.set/rename-keys {current-pos new-pos})
+          (update new-pos set-terrain-direction action))
+      terrain)))
 
 (defn- damage-terrain [terrain target attack]
   (if-let [health (get-in terrain [target :health])]
@@ -149,53 +156,49 @@
 ;;
 (def player-default-health 10)
 
-(defn player-health [{terrain :terrain pos :player-pos}]
-  (get-in terrain [pos :health]))
+(defn- is-player? [terrain]
+  (= (:type terrain) :player))
 
-(defn player-position [{pos :player-pos terrain :terrain}]
-  (when (contains? terrain pos)
-    pos))
+(defn player-position [game]
+  (first (reduce-kv #(if (is-player? %3) (conj %1 %2) %1)
+                    []
+                    (:terrain game))))
 
-(defn player-direction [{terrain :terrain pos :player-pos}]
-  (get-in terrain [pos :direction]))
+(defn player-health [{terrain :terrain :as game}]
+  (get-in terrain [(player-position game) :health]))
 
-(defn configure-player-weapon [{pos :player-pos :as game} overrides]
-  (update-in game [:terrain pos :weapon] merge overrides))
+(defn player-direction [{terrain :terrain :as game}]
+  (get-in terrain [(player-position game) :direction]))
+
+(defn configure-player-weapon [game overrides]
+  (update-in game [:terrain (player-position game) :weapon] merge overrides))
 
 (defn set-player
-  ([game position] (set-player game position :up))
-  ([game position direction]
-   (let [old-pos (:player-pos game)]
-     (-> game
-         (assoc :player-pos position)
-         (update :terrain (fn [terrain]
-                            (if old-pos
-                              (-> (rename-keys terrain {old-pos position})
-                                  (update position set-terrain-direction direction))
-                              (assoc terrain position (-> (make-terrain :player)
-                                                          (assoc :health player-default-health)
-                                                          (assoc :weapon (make-weapon :dagger))
-                                                          (set-terrain-direction direction))))))))))
+  ([game new-pos] (set-player game new-pos :up))
+  ([game new-pos direction]
+   (-> game
+       (update :terrain dissoc (player-position game))
+       (assoc-in [:terrain new-pos] (-> (make-terrain :player)
+                                        (assoc :health player-default-health)
+                                        (assoc :weapon (make-weapon :dagger))
+                                        (set-terrain-direction direction))))))
 
-(defn- move-player [{world-size :world-size current-pos :player-pos terrain :terrain :as game} action]
-  (let [new-pos (get-position current-pos action)
-        new-pos (if (and (in-world? world-size new-pos)
-                         (terrain-accessible? terrain new-pos))
-                  new-pos
-                  current-pos)]
-    (set-player game new-pos action)))
-
-(defn- player-attack [{terrain :terrain player-pos :player-pos :as game}]
+(defn- player-attack [{terrain :terrain :as game} player-pos]
   (reduce (fn [game counter]
             (let [target-pos (get-position player-pos (player-direction game) counter)]
               (update game :terrain attack-target player-pos target-pos :zombie)))
           game
           (range 1 (inc (weapon-range (get-in terrain [player-pos :weapon]))))))
 
-(defn run-player-action [game player-action]
-  (if (= :fire player-action)
-    (player-attack game)
-    (move-player game player-action)))
+(defn run-player-action [{world-size :world-size :as game} player-action]
+  (if-let [player-position (player-position game)]
+    (if (= :fire player-action)
+      (player-attack game player-position)
+      (update game :terrain move-terrain
+              player-position
+              player-action
+              world-size))
+    game))
 
 ;;
 ;; zombie
@@ -228,20 +231,19 @@
           (and (= x-dist 0) (> y-dist 0)) :up
           (and (= x-dist 0) (< y-dist 0)) :down)))
 
-(defn- move-zombie [terrain current-pos action]
-  (let [new-pos (get-position current-pos action)]
-    (if (terrain-accessible? terrain new-pos)
-      (clojure.set/rename-keys terrain {current-pos new-pos})
-      terrain)))
-
 (defn run-zombie-action [{terrain    :terrain
-                          player-pos :player-pos
+                          world-size :world-size
                           :as        game}
                          current-pos]
-  (if (in-weapon-range? terrain current-pos player-pos)
-    (update game :terrain attack-target current-pos player-pos :player)
-    (let [action (calculate-zombie-action current-pos player-pos)]
-      (update game :terrain move-zombie current-pos action))))
+  (if-let [player-pos (player-position game)]
+    (if (in-weapon-range? terrain current-pos player-pos)
+      (update game :terrain attack-target current-pos player-pos :player)
+      (let [action (calculate-zombie-action current-pos player-pos)]
+        (update game :terrain move-terrain
+                current-pos
+                action
+                world-size)))
+    game))
 
 ;;
 ;; game
