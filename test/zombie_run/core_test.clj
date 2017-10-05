@@ -102,7 +102,7 @@
                    (run-zombie-actions))]
       (is (= [2 3] (player-position game)))))
 
-  (testing "zombies do not accidentally occupy the same terrain (This hit me already)"
+  (testing "zombies do not accidentally occupy the same terrain"
     (let [game (-> (make-game {:player-pos [13 17]
                                :zombies    [[10 17] [10 18]]
                                :world-size [30 30]})
