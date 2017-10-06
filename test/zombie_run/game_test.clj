@@ -2,7 +2,7 @@
   (:require [clojure.test :refer :all]
             [zombie-run.spec-check :refer [instrument-function-specs]]
             [zombie-run.game :refer :all]
-            [zombie-run.weapon :refer [make-weapon]]))
+            [zombie-run.weapon :as weapon :refer [make-weapon]]))
 
 (instrument-function-specs)
 
@@ -58,7 +58,7 @@
   (testing "player attack kills a zombie"
     (let [game (-> (example-game)
                    (set-player [2 3] :up-left)
-                   (configure-player-weapon {:recharge-delay 0})
+                   (configure-player-weapon {::weapon/recharge-delay 0})
                    (player-fire-times 10))]
       (is (nil? (zombie-health game [1 2])))))
 
@@ -66,21 +66,21 @@
     (let [game (-> (example-game)
                    (set-player [2 3] :up-left)
                    (configure-player-weapon (make-weapon :musket))
-                   (configure-player-weapon {:recharge-delay 0})
+                   (configure-player-weapon {::weapon/recharge-delay 0})
                    (player-fire-times 10))]
       (is (nil? (zombie-health game [1 2])))))
 
   (testing "player weapon has a recharge delay"
     (let [game (-> (example-game)
                    (set-player [2 3] :up-left)
-                   (configure-player-weapon {:recharge-delay 10000})
+                   (configure-player-weapon {::weapon/recharge-delay 10000})
                    (player-fire-times 10))]
       (is (= 9 (zombie-health game [1 2])))))
 
   (testing "player weapon recharges also if it doesn't hit"
     (let [game (-> (example-game)
                    (set-player [3 4] :up-left)
-                   (configure-player-weapon {:recharge-delay 10000})
+                   (configure-player-weapon {::weapon/recharge-delay 10000})
                    (run-player-action :fire)
                    (run-player-action :up-left)
                    (player-fire-times 10))]
@@ -143,8 +143,8 @@
 
   (testing "zombies kill the player"
     (let [game (-> (example-game)
-                   (configure-zombie-weapon [1 2] {:recharge-delay 0})
-                   (configure-zombie-weapon [0 2] {:recharge-delay 0})
+                   (configure-zombie-weapon [1 2] {::weapon/recharge-delay 0})
+                   (configure-zombie-weapon [0 2] {::weapon/recharge-delay 0})
                    (step-times 6))]
       (is (nil? (player-health game)))
       (is (nil? (player-position game)))))

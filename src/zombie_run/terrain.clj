@@ -14,7 +14,7 @@
   (update-in terrain [position property] fn))
 
 (defn has-type? [terrain pos type]
-  (= (get-in terrain [pos :type]) type))
+  (= (get-in terrain [pos :zombie-run.game/type]) type))
 
 (defn- accessible? [terrain pos]
   (not (contains? terrain pos)))
@@ -24,15 +24,15 @@
     (if (accessible? terrain new-pos)
       (-> terrain
           (rename-keys {current-pos new-pos})
-          (set-property new-pos :direction action))
+          (set-property new-pos :zombie-run.game/direction action))
       terrain)))
 
 (defn damage [terrain target attack]
-  (if-let [health (get-in terrain [target :health])]
+  (if-let [health (get-in terrain [target :zombie-run.game/health])]
     (let [new-health (- health attack)]
       (if (>= 0 new-health)
         (dissoc terrain target)
-        (assoc-in terrain [target :health] new-health)))
+        (assoc-in terrain [target :zombie-run.game/health] new-health)))
     (throw (ex-info "Terrain cannot be damaged."
                     {:pos target}))))
 
@@ -40,6 +40,6 @@
   (get-in terrain [position property]))
 
 (defn get-positions [terrain type]
-  (reduce-kv #(if (= type (:type %3)) (conj %1 %2) %1)
+  (reduce-kv #(if (= type (:zombie-run.game/type %3)) (conj %1 %2) %1)
              []
              terrain))
