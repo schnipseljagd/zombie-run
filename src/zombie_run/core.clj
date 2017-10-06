@@ -78,18 +78,6 @@
     (throw (ex-info "Terrain cannot be damaged."
                     {:terrain terrain :pos target}))))
 
-(defn- attack-target [terrain attacker-pos target-pos target-type]
-  (if (weapon/weapon-is-ready? (get-in terrain [attacker-pos :weapon]))
-    (let [terrain (update-in terrain
-                             [attacker-pos :weapon]
-                             weapon/weapon-reset-recharge)]
-      (if (terrain-has-type? terrain target-pos target-type)
-        (damage-terrain terrain
-                        target-pos
-                        (weapon/weapon-attack (get-in terrain [attacker-pos :weapon])))
-        terrain))
-    terrain))
-
 ;;
 ;; player
 ;;
@@ -129,7 +117,10 @@
                                     (reduced target-pos))))
                               nil
                               (range 1 (inc (weapon/weapon-range (get-in terrain [player-pos :weapon])))))]
-    (update game :terrain attack-target player-pos target-pos :zombie)
+    (let [[weapon damage] (weapon/fire-weapon (get-in terrain [player-pos :weapon]))]
+      (assoc game :terrain (-> terrain
+                               (assoc-in [player-pos :weapon] weapon)
+                               (damage-terrain target-pos damage))))
     (update-in game [:terrain player-pos :weapon] weapon/weapon-reset-recharge)))
 ;;
 ;; zombie
@@ -176,7 +167,10 @@
                           current-pos]
   (if-let [player-pos (player-position game)]
     (if (weapon/in-weapon-range? terrain current-pos player-pos)
-      (update game :terrain attack-target current-pos player-pos :player)
+      (let [[weapon damage] (weapon/fire-weapon (get-in terrain [current-pos :weapon]))]
+        (assoc game :terrain (-> terrain
+                                 (assoc-in [current-pos :weapon] weapon)
+                                 (damage-terrain player-pos damage))))
       (let [action (calculate-zombie-action current-pos player-pos)]
         (update game :terrain move-terrain
                 current-pos
