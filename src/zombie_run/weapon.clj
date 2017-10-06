@@ -25,23 +25,23 @@
    (assert (contains? weapons type) "Weapon doesn't exist.")
    (assoc (get weapons type) :weapon-type type)))
 
-(defn- weapon-is-ready? [{last-attack :last-attack recharge-delay :recharge-delay}]
+(defn- is-ready? [{last-attack :last-attack recharge-delay :recharge-delay}]
   (let [available (t/plus last-attack (t/millis recharge-delay))
         now (t/now)]
     (or (t/after? now available)
         (t/equal? now available))))
 
-(defn weapon-range [{range :range}] range)
+(defn range [{range :range}] range)
 
-(defn in-weapon-range? [terrain attacker-pos target-pos]
-  (= (weapon-range (get-in terrain [attacker-pos :weapon]))
+(defn in-range? [terrain attacker-pos target-pos]
+  (= (range (get-in terrain [attacker-pos :weapon]))
      (measure-distance attacker-pos target-pos)))
 
-(defn weapon-reset-recharge [weapon]
+(defn reset-recharge [weapon]
   (assoc weapon :last-attack (t/now)))
 
-(defn fire-weapon [weapon]
-  (if (weapon-is-ready? weapon)
-    (let [weapon (weapon-reset-recharge weapon)]
+(defn fire [weapon]
+  (if (is-ready? weapon)
+    (let [weapon (reset-recharge weapon)]
       [weapon (:attack weapon)])
     [weapon 0]))

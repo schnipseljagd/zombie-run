@@ -84,8 +84,8 @@
         weapon range]
     (if-let [target-pos (reduce find-target
                                 nil
-                                (range 1 (inc (weapon/weapon-range player-weapon))))]
-      (let [[weapon damage] (weapon/fire-weapon player-weapon)]
+                                (range 1 (inc (weapon/range player-weapon))))]
+      (let [[weapon damage] (weapon/fire player-weapon)]
         (assoc game :terrain (-> terrain
                                  (terrain/set-property player-pos :weapon weapon)
                                  (terrain/damage target-pos damage))))
@@ -93,7 +93,7 @@
               terrain/update-property
               player-pos
               :weapon
-              weapon/weapon-reset-recharge))))
+              weapon/reset-recharge))))
 ;;
 ;; zombie
 ;;
@@ -137,8 +137,8 @@
                            :as        game}
                           current-pos]
   (if-let [player-pos (player-position game)]
-    (if (weapon/in-weapon-range? terrain current-pos player-pos)
-      (let [[weapon damage] (weapon/fire-weapon
+    (if (weapon/in-range? terrain current-pos player-pos)
+      (let [[weapon damage] (weapon/fire
                               (terrain/get-property terrain current-pos :weapon))]
         (assoc game :terrain (-> terrain
                                  (terrain/set-property current-pos :weapon weapon)
