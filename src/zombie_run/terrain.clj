@@ -19,11 +19,17 @@
 (defn make-terrain [terrain position properties]
   (assoc terrain position properties))
 
+(defn remove-terrain [terrain position]
+  (dissoc terrain position))
+
 (defn set-property [terrain position property value]
   (assoc-in terrain [position property] value))
 
-(defn update-property [terrain position property fn]
-  (update-in terrain [position property] fn))
+(defn update-property
+  ([terrain position property func]
+   (update-in terrain [position property] func))
+  ([terrain position property func & func-args]
+   (update-in terrain [position property] #(apply func % func-args))))
 
 (defn has-type? [terrain pos type]
   (= (get-in terrain [pos ::type]) type))

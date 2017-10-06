@@ -42,14 +42,20 @@
 (defn player-health [{terrain ::terrain/terrain-map :as game}]
   (terrain/get-property terrain (player-position game) ::terrain/health))
 
-(defn configure-player-weapon [game overrides]
-  (update-in game [::terrain/terrain-map (player-position game) ::weapon/weapon] merge overrides))
+(defn configure-player-weapon [{terrain :terrain :as game} overrides]
+  (update game ::terrain/terrain-map
+          terrain/update-property
+          (player-position game)
+          ::weapon/weapon
+          merge
+          overrides))
 
 (defn set-player
   ([game new-pos] (set-player game new-pos :up))
   ([game new-pos direction]
    (-> game
-       (update ::terrain/terrain-map dissoc (player-position game))
+       (update ::terrain/terrain-map terrain/remove-terrain
+               (player-position game))
        (update ::terrain/terrain-map terrain/make-terrain
                new-pos
                {::terrain/type      :player
@@ -86,7 +92,12 @@
 (def zombie-default-health 10)
 
 (defn configure-zombie-weapon [game pos overrides]
-  (update-in game [::terrain/terrain-map pos ::weapon/weapon] merge overrides))
+  (update game ::terrain/terrain-map
+          terrain/update-property
+          pos
+          ::weapon/weapon
+          merge
+          overrides))
 
 (defn zombie-health [{terrain ::terrain/terrain-map} position]
   (terrain/get-property terrain position ::terrain/health))
