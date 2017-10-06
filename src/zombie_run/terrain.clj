@@ -1,6 +1,18 @@
 (ns zombie-run.terrain
   (:require [zombie-run.world :refer [get-position]]
-            [clojure.set :refer [rename-keys]]))
+            [clojure.set :refer [rename-keys]]
+            [clojure.spec.alpha :as s]))
+
+(s/def ::position (s/tuple (s/int-in 0 500) (s/int-in 0 500)))
+
+(s/def ::type #{:zombie :player})
+(s/def ::direction #{:left :right :up :down :up-left :up-right :down-left :down-right})
+(s/def ::health int?)
+(defmulti terrain-type ::type)
+
+(s/def ::terrain (s/multi-spec terrain-type ::type))
+(s/def ::terrain-map (s/map-of ::position ::terrain))
+
 
 (defn init-map [] {})
 
@@ -14,7 +26,7 @@
   (update-in terrain [position property] fn))
 
 (defn has-type? [terrain pos type]
-  (= (get-in terrain [pos :zombie-run.game/type]) type))
+  (= (get-in terrain [pos ::type]) type))
 
 (defn- accessible? [terrain pos]
   (not (contains? terrain pos)))
@@ -24,15 +36,15 @@
     (if (accessible? terrain new-pos)
       (-> terrain
           (rename-keys {current-pos new-pos})
-          (set-property new-pos :zombie-run.game/direction action))
+          (set-property new-pos ::direction action))
       terrain)))
 
 (defn damage [terrain target attack]
-  (if-let [health (get-in terrain [target :zombie-run.game/health])]
+  (if-let [health (get-in terrain [target ::health])]
     (let [new-health (- health attack)]
       (if (>= 0 new-health)
         (dissoc terrain target)
-        (assoc-in terrain [target :zombie-run.game/health] new-health)))
+        (assoc-in terrain [target ::health] new-health)))
     (throw (ex-info "Terrain cannot be damaged."
                     {:pos target}))))
 
@@ -40,6 +52,6 @@
   (get-in terrain [position property]))
 
 (defn get-positions [terrain type]
-  (reduce-kv #(if (= type (:zombie-run.game/type %3)) (conj %1 %2) %1)
+  (reduce-kv #(if (= type (::type %3)) (conj %1 %2) %1)
              []
              terrain))
