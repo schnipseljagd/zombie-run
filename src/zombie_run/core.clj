@@ -120,15 +120,17 @@
                                         (set-terrain-direction direction))))))
 
 (defn- player-attack [{terrain :terrain world-size :world-size :as game} player-pos]
-  (reduce (fn [game counter]
-            (let [target-pos (world/get-position world-size
-                                                 player-pos
-                                                 (get-in terrain [player-pos :direction])
-                                                 counter)]
-              (update game :terrain attack-target player-pos target-pos :zombie)))
-          game
-          (range 1 (inc (weapon/weapon-range (get-in terrain [player-pos :weapon]))))))
-
+  (if-let [target-pos (reduce (fn [_ counter]
+                                (let [target-pos (world/get-position world-size
+                                                                     player-pos
+                                                                     (get-in terrain [player-pos :direction])
+                                                                     counter)]
+                                  (when (terrain-has-type? terrain target-pos :zombie)
+                                    (reduced target-pos))))
+                              nil
+                              (range 1 (inc (weapon/weapon-range (get-in terrain [player-pos :weapon])))))]
+    (update game :terrain attack-target player-pos target-pos :zombie)
+    (update-in game [:terrain player-pos :weapon] weapon/weapon-reset-recharge)))
 ;;
 ;; zombie
 ;;
@@ -185,13 +187,17 @@
 ;;
 ;; game
 ;;
-(defn make-game [{world-size :world-size player-pos :player-pos zombies :zombies}]
+(defn make-game [{world-size      :world-size
+                  player-pos      :player-pos
+                  player-direcion :player-direction
+                  zombies         :zombies}]
   (-> {:world-size world-size
        :terrain    {}}
       (set-zombies (or zombies
                        [(world/world-left-upper-corner world-size)
                         (world/world-right-upper-corner world-size)]))
-      (set-player (or player-pos (world/world-center world-size)))))
+      (set-player (or player-pos (world/world-center world-size))
+                  (or player-direcion :up))))
 
 (defn run-player-action [{world-size :world-size :as game} player-action]
   (if-let [player-position (player-position game)]

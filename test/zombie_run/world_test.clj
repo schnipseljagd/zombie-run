@@ -17,3 +17,6 @@
                      [0 0] [0 0] :up-left
                      [0 0] [0 0] :up
                      [0 0] [0 0] :left))
+
+(deftest takes-the-amount-of-steps-to-go
+  (is (= [1 1] (get-position example-world [4 4] :up-left 3))))

@@ -93,6 +93,16 @@
                    (run-player-action :fire))]
       (is (= 6 (zombie-health game [1 2]))))))
 
+(deftest player-weapons-have-different-ranges
+  (testing "player weapons have different ranges"
+    (let [game (-> (make-game {:player-pos [4 4]
+                               :world-size [5 5]
+                               :zombies    [[1 1]]
+                               :player-direction :up-left})
+                   (configure-player-weapon (make-weapon :musket))
+                   (run-player-action :fire))]
+      (is (= 6 (zombie-health game [1 1]))))))
+
 
 (deftest move-zombies-test
   (testing "zombies move towards player"

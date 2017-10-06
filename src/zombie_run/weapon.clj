@@ -9,7 +9,7 @@
                             :attack         1
                             :recharge-delay 200
                             :last-attack    no-last-attack}
-              :musket      {:range          4
+              :musket      {:range          100
                             :attack         4
                             :recharge-delay 2000
                             :last-attack    no-last-attack}
