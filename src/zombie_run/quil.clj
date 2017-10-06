@@ -92,7 +92,8 @@
 
 (defn run-zombieland []
   (let [[world-x world-y] [300 150]
-        default-game (game/make-game {:world-size [world-x world-y]})
+        default-game (-> (game/make-game {:world-size [world-x world-y]})
+                         (game/configure-player-weapon (zombie-run.weapon/make-weapon :musket)))
         game (atom default-game)
         ticker (interval/start #(swap! game game/run-zombie-actions) 100)]
 
