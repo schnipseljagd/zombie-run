@@ -1,8 +1,8 @@
 (ns zombie-run.quil
   (:gen-class)
   (:require [quil.core :as q]
-            [zombie-run.core :as z]
-            [zombie-run.world :as w]
+            [zombie-run.game :as game]
+            [zombie-run.world :refer [world-center]]
             [util.interval :as interval])
   (:import (java.awt.event KeyEvent)))
 
@@ -52,7 +52,7 @@
        (q/with-stroke [255 0 0])))
 
 (defn display-centered-text [game text]
-  (let [[center-x center-y] (w/world-center (:world-size game))]
+  (let [[center-x center-y] (world-center (:world-size game))]
     (q/text text
             (width* center-x)
             (width* center-y))))
@@ -65,36 +65,36 @@
   (q/text-size 20)                                          ; default text size
 
   ; display text
-  (if-let [player-health (z/player-health game)]
+  (if-let [player-health (game/player-health game)]
     (->> (q/text (format "Health: %s" player-health)
                  (width* 5)
                  (width* 5)))
-    (let [[center-x center-y] (w/world-center (:world-size game))]
+    (let [[center-x center-y] (world-center (:world-size game))]
       (display-centered-text game "You are dead!")))
 
-  (when (empty? (z/zombie-positions game))
-    (let [[center-x center-y] (w/world-center (:world-size game))]
+  (when (empty? (game/zombie-positions game))
+    (let [[center-x center-y] (world-center (:world-size game))]
       (display-centered-text game "You survived!")))
 
   ; display player
-  (when-let [pos (z/player-position game)]
+  (when-let [pos (game/player-position game)]
     (display-player pos)
     (display-health-indicator pos
-                              (z/player-health game)
-                              z/player-default-health))
+                              (game/player-health game)
+                              game/player-default-health))
 
   ; display zombies
-  (doseq [pos (z/zombie-positions game)]
+  (doseq [pos (game/zombie-positions game)]
     (display-zombie pos)
     (display-health-indicator pos
-                              (z/zombie-health game pos)
-                              z/zombie-default-health)))
+                              (game/zombie-health game pos)
+                              game/zombie-default-health)))
 
 (defn run-zombieland []
   (let [[world-x world-y] [300 150]
-        default-game (z/make-game {:world-size [world-x world-y]})
+        default-game (game/make-game {:world-size [world-x world-y]})
         game (atom default-game)
-        ticker (interval/start #(swap! game z/run-zombie-actions) 100)]
+        ticker (interval/start #(swap! game game/run-zombie-actions) 100)]
 
     (q/defsketch zombie-run
                  :size [(width* world-x) (width* world-y)]
@@ -109,7 +109,7 @@
                                         (key-has-action? []
                                           (boolean (key->action)))]
                                   (cond (key-newline?) (reset! game default-game)
-                                        (key-has-action?) (swap! game #(z/run-player-action % (key->action))))))
+                                        (key-has-action?) (swap! game #(game/run-player-action % (key->action))))))
                  :on-close #(interval/stop ticker))))
 
 (comment

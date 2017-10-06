@@ -1,4 +1,4 @@
-(ns zombie-run.core
+(ns zombie-run.game
   (:require [clj-time.core :as t]
             [clj-time.spec :as time-spec]
             [clojure.set :refer [rename-keys]]

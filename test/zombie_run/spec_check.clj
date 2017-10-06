@@ -1,9 +1,9 @@
 (ns zombie-run.spec-check
   (:require [clojure.test :refer :all]
             [clojure.spec.test.alpha :as stest]
-            [zombie-run.core]))
+            [zombie-run.game]))
 
-(def symbols-under-test (stest/enumerate-namespace 'zombie-run.core))
+(def symbols-under-test (stest/enumerate-namespace 'zombie-run.game))
 
 (defn instrument-function-specs []
   (stest/instrument symbols-under-test))

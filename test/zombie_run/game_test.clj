@@ -1,7 +1,7 @@
-(ns zombie-run.core-test
+(ns zombie-run.game-test
   (:require [clojure.test :refer :all]
             [zombie-run.spec-check :refer [instrument-function-specs]]
-            [zombie-run.core :refer :all]
+            [zombie-run.game :refer :all]
             [zombie-run.weapon :refer [make-weapon]]))
 
 (instrument-function-specs)
