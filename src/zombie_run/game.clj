@@ -150,6 +150,8 @@
 ;;
 ;; game
 ;;
+(defn world-size [{world-size ::world-size}] world-size)
+
 (defn make-game [{world-size      :world-size
                   player-pos      :player-pos
                   player-direcion :player-direction
