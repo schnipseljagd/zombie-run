@@ -25,16 +25,29 @@
 
 ; make-game
 (s/def ::player-pos ::terrain/position)
-(s/def ::player-direction ::terrain/direction)
+(s/def ::player-direction #{:left :right :up :down :up-left :up-right :down-left :down-right})
 (s/def ::zombies (s/coll-of ::terrain/position :distinct true))
 
 ; run-player-action
-(s/def ::player-action (conj (s/describe ::terrain/direction) :fire))
+(s/def ::player-action (conj (s/describe ::player-direction) :fire))
 
 ;;
 ;; player
 ;;
+(def action-coords-map {:right      [1 0]
+                        :left       [-1 0]
+                        :up         [0 -1]
+                        :up-left    [-1 -1]
+                        :up-right   [1 -1]
+                        :down       [0 1]
+                        :down-left  [-1 1]
+                        :down-right [1 1]})
+
 (def player-default-health 10)
+
+(defn action->coords [player-action]
+  {:pre [(contains? action-coords-map player-action)]}
+  (get action-coords-map player-action))
 
 (defn player-position [{terrain ::terrain/terrain-map}]
   (first (terrain/get-positions terrain :player)))
@@ -61,16 +74,16 @@
                {::terrain/type      :player
                 ::terrain/health    player-default-health
                 ::weapon/weapon     (weapon/make-weapon :dagger)
-                ::terrain/direction direction}))))
+                ::terrain/direction (action->coords direction)}))))
 
 (defn- player-attack [{terrain ::terrain/terrain-map world-size ::world-size :as game} player-pos]
   (let [player-direction (terrain/get-property terrain player-pos ::terrain/direction)
         player-weapon (terrain/get-property terrain player-pos ::weapon/weapon)
         find-target (fn [_ counter]
-                      (let [target-pos (world/get-position world-size
-                                                           player-pos
-                                                           player-direction
-                                                           counter)]
+                      (let [target-pos (world/step-into-direction world-size
+                                                                  player-pos
+                                                                  player-direction
+                                                                  counter)]
                         (when (terrain/has-type? terrain target-pos :zombie)
                           (reduced target-pos))))
         weapon range]
@@ -90,6 +103,7 @@
 ;; zombie
 ;;
 (def zombie-default-health 10)
+(def zombie-default-direction [0 1])
 
 (defn configure-zombie-weapon [game pos overrides]
   (update game ::terrain/terrain-map
@@ -106,16 +120,12 @@
   (sort (terrain/get-positions terrain :zombie)))
 
 (defn- calculate-zombie-action [[x y] [player-x player-y]]
-  (let [x-dist (- x player-x)
-        y-dist (- y player-y)]
-    (cond (and (> x-dist 0) (> y-dist 0)) :up-left
-          (and (> x-dist 0) (= y-dist 0)) :left
-          (and (> x-dist 0) (< y-dist 0)) :down-left
-          (and (< x-dist 0) (> y-dist 0)) :up-right
-          (and (< x-dist 0) (= y-dist 0)) :right
-          (and (< x-dist 0) (< y-dist 0)) :down-right
-          (and (= x-dist 0) (> y-dist 0)) :up
-          (and (= x-dist 0) (< y-dist 0)) :down)))
+  (apply vector (map #(cond (< %1 %2) -1
+                            (> %1 %2) 1
+                            :else 0)
+                     [player-x player-y]
+                     [x y])))
+
 
 (defn- set-zombie [game position]
   (update game ::terrain/terrain-map
@@ -124,7 +134,7 @@
           {::terrain/type      :zombie
            ::terrain/health    zombie-default-health
            ::weapon/weapon     (weapon/make-weapon :zombie-fist)
-           ::terrain/direction :up}))
+           ::terrain/direction zombie-default-direction}))
 
 (defn- set-zombies [game positions]
   (reduce set-zombie game positions))
@@ -170,7 +180,7 @@
       (player-attack game player-position)
       (update game ::terrain/terrain-map terrain/move
               player-position
-              player-action
+              (action->coords player-action)
               world-size))
     game))
 

@@ -1,12 +1,12 @@
 (ns zombie-run.terrain
-  (:require [zombie-run.world :refer [get-position]]
+  (:require [zombie-run.world :refer [step-into-direction]]
             [clojure.set :refer [rename-keys]]
             [clojure.spec.alpha :as s]))
 
 (s/def ::position (s/tuple (s/int-in 0 500) (s/int-in 0 500)))
 
 (s/def ::type #{:zombie :player})
-(s/def ::direction #{:left :right :up :down :up-left :up-right :down-left :down-right})
+(s/def ::direction (s/tuple (s/int-in -1 2) (s/int-in -1 2)))
 (s/def ::health int?)
 (defmulti terrain-type ::type)
 
@@ -38,7 +38,7 @@
   (not (contains? terrain pos)))
 
 (defn move [terrain current-pos action world-size]
-  (let [new-pos (get-position world-size current-pos action)]
+  (let [new-pos (step-into-direction world-size current-pos action)]
     (if (accessible? terrain new-pos)
       (-> terrain
           (rename-keys {current-pos new-pos})

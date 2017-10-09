@@ -17,6 +17,12 @@
 (defn step-times [game n]
   (last (take (inc n) (iterate run-zombie-actions game))))
 
+(deftest test-action->coords-only-allows-directions
+  (is (thrown? AssertionError (action->coords :foo))))
+
+(deftest test-action->coords-returns-an-action-for-movement
+  (is (= [0 1] (action->coords :down))))
+
 (deftest move-player-test
   (let [player-move (fn [game action] (-> game
                                           (run-player-action action)

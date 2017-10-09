@@ -5,18 +5,18 @@
 (def example-world [5 5])
 
 (deftest new-position-in-given-direction
-  (is (= [4 3] (get-position example-world [4 4] :up))))
+  (is (= [4 3] (step-into-direction example-world [4 4] [0 -1]))))
 
 (deftest does-not-return-positions-outside-the-world
-  (are [new current direction] (= new (get-position example-world
-                                                    current
-                                                    direction))
-                     [4 4] [4 4] :down-right
-                     [4 4] [4 4] :down
-                     [4 4] [4 4] :right
-                     [0 0] [0 0] :up-left
-                     [0 0] [0 0] :up
-                     [0 0] [0 0] :left))
+  (are [new current direction] (= new (step-into-direction example-world
+                                                           current
+                                                           direction))
+                               [4 4] [4 4] [1 1]
+                               [4 4] [4 4] [0 1]
+                               [4 4] [4 4] [1 0]
+                               [0 0] [0 0] [-1 -1]
+                               [0 0] [0 0] [0 -1]
+                               [0 0] [0 0] [-1 0]))
 
 (deftest takes-the-amount-of-steps-to-go
-  (is (= [1 1] (get-position example-world [4 4] :up-left 3))))
+  (is (= [1 1] (step-into-direction example-world [4 4] [-1 -1] 3))))
