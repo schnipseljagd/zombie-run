@@ -76,20 +76,24 @@
                 ::weapon/weapon     (weapon/make-weapon :dagger)
                 ::terrain/direction (action->coords direction)}))))
 
+(defn- find-target-in-range [terrain world-size player-pos range]
+  (let [player-direction (terrain/get-property terrain player-pos ::terrain/direction)]
+    (reduce (fn [_ counter]
+              (let [target-pos (world/step-into-direction world-size
+                                                          player-pos
+                                                          player-direction
+                                                          counter)]
+                (when (terrain/has-type? terrain target-pos :zombie)
+                  (reduced target-pos))))
+            nil
+            (range 1 (inc range)))))
+
 (defn- player-attack [{terrain ::terrain/terrain-map world-size ::world-size :as game} player-pos]
-  (let [player-direction (terrain/get-property terrain player-pos ::terrain/direction)
-        player-weapon (terrain/get-property terrain player-pos ::weapon/weapon)
-        find-target (fn [_ counter]
-                      (let [target-pos (world/step-into-direction world-size
-                                                                  player-pos
-                                                                  player-direction
-                                                                  counter)]
-                        (when (terrain/has-type? terrain target-pos :zombie)
-                          (reduced target-pos))))
-        weapon range]
-    (if-let [target-pos (reduce find-target
-                                nil
-                                (range 1 (inc (weapon/weapon-range player-weapon))))]
+  (let [player-weapon (terrain/get-property terrain player-pos ::weapon/weapon)]
+    (if-let [target-pos (find-target-in-range terrain
+                                              world-size
+                                              player-pos
+                                              (weapon/weapon-range player-weapon))]
       (let [[weapon damage] (weapon/fire player-weapon)]
         (assoc game ::terrain/terrain-map (-> terrain
                                               (terrain/set-property player-pos ::weapon/weapon weapon)
