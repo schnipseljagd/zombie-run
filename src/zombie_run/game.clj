@@ -56,7 +56,8 @@
   (terrain/get-property terrain (player-position game) ::terrain/health))
 
 (defn configure-player-weapon [{terrain :terrain :as game} overrides]
-  (update game ::terrain/terrain-map
+  (update game
+          ::terrain/terrain-map
           terrain/update-property
           (player-position game)
           ::weapon/weapon
@@ -67,9 +68,11 @@
   ([game new-pos] (set-player game new-pos :up))
   ([game new-pos direction]
    (-> game
-       (update ::terrain/terrain-map terrain/remove-terrain
+       (update ::terrain/terrain-map
+               terrain/remove-terrain
                (player-position game))
-       (update ::terrain/terrain-map terrain/make-terrain
+       (update ::terrain/terrain-map
+               terrain/make-terrain
                new-pos
                {::terrain/type      :player
                 ::terrain/health    player-default-health
@@ -98,7 +101,8 @@
         (assoc game ::terrain/terrain-map (-> terrain
                                               (terrain/set-property player-pos ::weapon/weapon weapon)
                                               (terrain/damage target-pos damage))))
-      (update game ::terrain/terrain-map
+      (update game
+              ::terrain/terrain-map
               terrain/update-property
               player-pos
               ::weapon/weapon
@@ -110,7 +114,8 @@
 (def zombie-default-direction [0 1])
 
 (defn configure-zombie-weapon [game pos overrides]
-  (update game ::terrain/terrain-map
+  (update game
+          ::terrain/terrain-map
           terrain/update-property
           pos
           ::weapon/weapon
@@ -132,7 +137,8 @@
 
 
 (defn- set-zombie [game position]
-  (update game ::terrain/terrain-map
+  (update game
+          ::terrain/terrain-map
           terrain/make-terrain
           position
           {::terrain/type      :zombie
@@ -155,7 +161,9 @@
                                               (terrain/set-property current-pos ::weapon/weapon weapon)
                                               (terrain/damage player-pos damage))))
       (let [action (calculate-zombie-action current-pos player-pos)]
-        (update game ::terrain/terrain-map terrain/move
+        (update game
+                ::terrain/terrain-map
+                terrain/move
                 current-pos
                 action
                 world-size)))
@@ -182,7 +190,9 @@
   (if-let [player-position (player-position game)]
     (if (= :fire player-action)
       (player-attack game player-position)
-      (update game ::terrain/terrain-map terrain/move
+      (update game
+              ::terrain/terrain-map
+              terrain/move
               player-position
               (action->coords player-action)
               world-size))
