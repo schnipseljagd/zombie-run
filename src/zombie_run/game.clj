@@ -79,7 +79,7 @@
                 ::weapon/weapon     (weapon/make-weapon :dagger)
                 ::terrain/direction (action->coords direction)}))))
 
-(defn- find-target-in-range [terrain world-size player-pos range]
+(defn- find-target-in-range [terrain world-size player-pos r]
   (let [player-direction (terrain/get-property terrain player-pos ::terrain/direction)]
     (reduce (fn [_ counter]
               (let [target-pos (world/step-into-direction world-size
@@ -89,7 +89,7 @@
                 (when (terrain/has-type? terrain target-pos :zombie)
                   (reduced target-pos))))
             nil
-            (range 1 (inc range)))))
+            (range 1 (inc r)))))
 
 (defn- player-attack [{terrain ::terrain/terrain-map world-size ::world-size :as game} player-pos]
   (let [player-weapon (terrain/get-property terrain player-pos ::weapon/weapon)]
