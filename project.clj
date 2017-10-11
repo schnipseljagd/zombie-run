@@ -8,7 +8,10 @@
                  [quil "2.6.0"]
                  [reagent "0.8.0-alpha1"]]
 
-  :monkeypatch-clojure-test false                           ; See https://github.com/technomancy/leiningen/issues/2173
+  :monkeypatch-clojure-test false
+
+  :source-paths ["src/clj" "src/cljs" "src/cljc"]
+  :test-paths ["test/clj" "test/cljc" "src/cljs"]
 
   :plugins [[lein-cljsbuild "1.1.7"]]
 
@@ -17,7 +20,7 @@
 
   :cljsbuild {
               :builds [{:id           "example"
-                        :source-paths ["src/"]
+                        :source-paths ["src/cljs/"]
                         :figwheel     true
                         :compiler     {:main       "example.core"
                                        :asset-path "js/out"
