@@ -1,0 +1,18 @@
+html, body {
+   margin:0;
+   padding:0;
+   overflow:hidden
+}
+svg.world {
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    background-image: url('../images/gridpaperlightbluepattern.png');
+}
+text.bar {
+    font-size: 10%
+}
+text.overlay {
+    font-size: 50%
+}
