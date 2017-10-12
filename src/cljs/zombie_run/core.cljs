@@ -1,6 +1,6 @@
-(ns example.core
+(ns zombie-run.core
   (:require [reagent.core :as reagent]
-            [example.view :as view]
+            [zombie-run.view :as view]
             [goog.events :as events]))
 
 (def key-code->action
@@ -24,7 +24,6 @@
    "h"          :left
    "j"          :down
    "k"          :up
-
    ;; fire
    "f"          :fire})
 

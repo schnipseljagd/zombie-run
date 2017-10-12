@@ -1,4 +1,4 @@
-(ns example.view)
+(ns zombie-run.view)
 
 (defn make-zombie [[x y]]
   [:rect.zombie

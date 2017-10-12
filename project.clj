@@ -20,12 +20,12 @@
              :open-file-command "open-in-intellij"}
 
   :cljsbuild {
-              :builds [{:id           "example"
+              :builds [{:id           "zombie-run"
                         :source-paths ["src/cljs/"]
                         :figwheel     true
-                        :compiler     {:main       "example.core"
+                        :compiler     {:main       "zombie-run.core"
                                        :asset-path "js/out"
-                                       :output-to  "resources/public/js/example.js"
+                                       :output-to  "resources/public/js/zombie_run.js"
                                        :output-dir "resources/public/js/out"}}]}
 
 
