@@ -1,6 +1,8 @@
 (ns zombie-run.world-test
-  (:require [clojure.test :refer :all]
-            [zombie-run.world :refer :all]))
+  (:require [zombie-run.world :refer :all]
+    #?(:cljs [cljs.test :as t :refer-macros [is are deftest]]
+       :clj
+            [clojure.test :as t :refer [is are deftest]])))
 
 (def example-world [5 5])
 
