@@ -9,5 +9,5 @@
     (.setDaemon true)
     (.start)))
 
-(defn stop [thread]
+(defn stop [^Thread thread]
   (.interrupt thread))
