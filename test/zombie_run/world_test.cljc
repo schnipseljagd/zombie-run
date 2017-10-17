@@ -7,10 +7,10 @@
 
 (def example-world [5 5])
 
-(deftest new-position-in-given-direction
+(deftest test-new-position-in-given-direction
   (is (= [4 3] (step-into-direction example-world [4 4] [0 -1]))))
 
-(deftest does-not-return-positions-outside-the-world
+(deftest test-does-not-return-positions-outside-the-world
   (are [new current direction] (= new (step-into-direction example-world
                                                            current
                                                            direction))
@@ -21,5 +21,5 @@
                                [0 0] [0 0] [0 -1]
                                [0 0] [0 0] [-1 0]))
 
-(deftest takes-the-amount-of-steps-to-go
+(deftest test-takes-the-amount-of-steps-to-go
   (is (= [1 1] (step-into-direction example-world [4 4] [-1 -1] 3))))

@@ -6,7 +6,7 @@
        :clj
             [clojure.test :refer :all])))
 
-(deftest check-specs-test
+(deftest test-check-specs
   ; using clojure reader conditionals here shouldn't
   ; be necessary when the clj part does contain the latest changes
   (let [report (stest/check #?(:clj (stest/enumerate-namespace 'zombie-run.game)
