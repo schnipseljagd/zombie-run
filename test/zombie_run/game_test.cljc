@@ -27,14 +27,8 @@
 (defn player-fire-times [game n]
   (last (take (inc n) (iterate #(run-player-action % :fire) game))))
 
-(defn step-times [game n]
+(defn run-zombie-actions-times [game n]
   (last (take (inc n) (iterate run-zombie-actions game))))
-
-(defn player-move [game action]
-  (-> game
-      (run-player-action action)
-      (run-zombie-actions)
-      (player-position)))
 
 (deftest test-action->coords-only-allows-directions
   (is (thrown? #?(:clj  AssertionError
@@ -46,7 +40,8 @@
 
 (deftest test-player-move
   (are [pos action] (= pos (-> (example-game)
-                               (player-move action)))
+                               (run-player-action action)
+                               (player-position)))
                     [3 3] :right
                     [1 3] :left
                     [2 2] :up
@@ -55,14 +50,16 @@
 (deftest test-player-does-not-move-out-of-the-world
   (are [pos action] (= pos (-> (example-game)
                                (set-player [0 4])
-                               (player-move action)))
+                               (run-player-action action)
+                               (player-position)))
                     [0 4] :left
                     [0 4] :down))
 
 (deftest test-player-cannot-move-on-if-a-terrain-is-blocked
   (is (= [0 1] (-> (example-game)
                    (set-player [0 1])
-                   (player-move :down)))))
+                   (run-player-action :down)
+                   (player-position)))))
 
 (deftest test-player-attack-does-not-hit-the-zombie
   (let [game (-> (example-game)
@@ -162,7 +159,7 @@
   (let [game (-> (example-game)
                  (configure-zombie-weapon [1 2] {::weapon/recharge-delay 0})
                  (configure-zombie-weapon [0 2] {::weapon/recharge-delay 0})
-                 (step-times 6))]
+                 (run-zombie-actions-times 6))]
     (is (nil? (player-health game)))
     (is (nil? (player-position game)))))
 
