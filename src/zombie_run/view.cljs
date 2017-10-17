@@ -88,13 +88,12 @@
    (into
      [:svg.world
       {:view-box "0 0 100 100"}]
-     (mapcat identity
-             [[(display-health-text game-state)
+     (concat (display-player game-state)
 
-               (make-fire-tip-text)
+             (display-zombies game-state)
 
-               (display-overlay-text game-state)]
+             [(display-health-text game-state)
 
-              (display-player game-state)
+              (make-fire-tip-text)
 
-              (display-zombies game-state)]))])
+              (display-overlay-text game-state)]))])
