@@ -72,23 +72,29 @@
    [:tspan {:x 50 :y 2} "Move in the direction of a zombie"]
    [:tspan {:x 50 :y 4} "and press <f> to fire!"]])
 
+(defn display-player [game-state]
+  (when-let [pos (game/player-position game-state)]
+    (into [(make-player pos)]
+          (make-blood pos
+                      game/player-default-health
+                      (game/player-health game-state)))))
+
+(defn display-health-text [game-state]
+  (when-let [player-health (game/player-health game-state)]
+    (make-health-text player-health)))
+
 (defn world [game-state]
   [:div
    (into
      [:svg.world
       {:view-box "0 0 100 100"}]
      (mapcat identity
-             [[(when-let [player-health (game/player-health game-state)]
-                 (make-health-text player-health))
+             [[(display-health-text game-state)
 
                (make-fire-tip-text)
 
                (display-overlay-text game-state)]
 
-              (when-let [pos (game/player-position game-state)]
-                (into [(make-player pos)]
-                      (make-blood pos
-                                  game/player-default-health
-                                  (game/player-health game-state))))
+              (display-player game-state)
 
               (display-zombies game-state)]))])
