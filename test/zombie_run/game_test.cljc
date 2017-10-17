@@ -31,7 +31,9 @@
   (last (take (inc n) (iterate run-zombie-actions game))))
 
 (deftest test-action->coords-only-allows-directions
-  (is (thrown? AssertionError (action->coords :foo))))
+  (is (thrown? #?(:clj AssertionError
+                  :cljs js/Error)
+               (action->coords :foo))))
 
 (deftest test-action->coords-returns-an-action-for-movement
   (is (= [0 1] (action->coords :down))))
