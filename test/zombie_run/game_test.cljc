@@ -17,7 +17,7 @@
        :clj
             [clojure.test :refer :all])))
 
-(stest/instrument `zombie-run.game)
+(stest/instrument)
 
 (defn example-game []
   (make-game {:player-pos [2 3]
