@@ -15,6 +15,6 @@
       (throw (ex-info "No spec reports found." {}))
       (doseq [report report]
         (let [result (get-in report [:clojure.spec.test.check/ret :result])]
-          (when-not (true? result)
+          (when (false? result)
             (prn (:failure report)))
-          (is (true? result)))))))
+          (is (not (false? result)))))))) ; cljs returns nil if successful and clj true

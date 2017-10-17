@@ -10,7 +10,10 @@
        :clj
             [clj-time.core :as t])))
 
-#?(:cljs (s/def ::date-time #(t/date? %))
+#?(:cljs (s/def ::date-time (s/with-gen #(t/date? %)
+                                        #(s/gen #{(t/date-time 2001 1 1 00 00 00)
+                                                  (t/now)
+                                                  (t/date-time 2031 1 1 0 00 00)})))
    :clj  (s/def ::date-time :clj-time.spec/date-time))
 
 (s/def ::type #{:dagger :musket :zombie-fist})
