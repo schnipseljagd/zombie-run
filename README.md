@@ -9,7 +9,7 @@ A simple zombie shooter
 
 ## Tests
 
-    lein tests
+    lein all-tests
 
 ## License
 

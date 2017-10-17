@@ -1,14 +1,23 @@
 (ns zombie-run.weapon
-  (:require [clj-time.core :as t]
-            [zombie-run.world :refer [measure-distance]]
-            [clj-time.spec]
-            [clojure.spec.alpha :as s]))
+  (:require [zombie-run.world :refer [measure-distance]]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
+
+    #?(:clj
+            [clj-time.spec])
+
+    #?(:cljs [cljs-time.core :as t]
+       :clj
+            [clj-time.core :as t])))
+
+#?(:cljs (s/def ::date-time #(t/date? %))
+   :clj  (s/def ::date-time :clj-time.spec/date-time))
 
 (s/def ::type #{:dagger :musket :zombie-fist})
 (s/def ::range (s/int-in 1 1000))
 (s/def ::attack pos-int?)
 (s/def ::recharge-delay (s/int-in 0 (* 1000 1000)))
-(s/def ::last-attack :clj-time.spec/date-time)
+(s/def ::last-attack ::date-time)
 (s/def ::weapon (s/keys :req [::type
                               ::range
                               ::attack

@@ -1,8 +1,9 @@
 (ns zombie-run.world-test
-  (:require [zombie-run.world :refer :all]
+  (:require [zombie-run.world :refer [step-into-direction]]
+
     #?(:cljs [cljs.test :as t :refer-macros [is are deftest]]
        :clj
-            [clojure.test :as t :refer [is are deftest]])))
+            [clojure.test :as t :refer :all])))
 
 (def example-world [5 5])
 

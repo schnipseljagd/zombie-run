@@ -1,6 +1,5 @@
 (ns zombie-run.game
-  (:require [clj-time.core :as t]
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [zombie-run.world :as world]
             [zombie-run.weapon :as weapon]
             [zombie-run.terrain :as terrain]))

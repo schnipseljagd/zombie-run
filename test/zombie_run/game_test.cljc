@@ -1,10 +1,23 @@
 (ns zombie-run.game-test
-  (:require [clojure.test :refer :all]
-            [zombie-run.spec-check :refer [instrument-function-specs]]
-            [zombie-run.game :refer :all]
-            [zombie-run.weapon :as weapon :refer [make-weapon]]))
+  (:require [zombie-run.game :refer [make-game
+                                     run-player-action
+                                     run-zombie-actions
+                                     action->coords
+                                     player-position
+                                     set-player
+                                     zombie-health
+                                     configure-player-weapon
+                                     configure-zombie-weapon
+                                     zombie-positions
+                                     player-health]]
+            [zombie-run.weapon :as weapon :refer [make-weapon]]
+            [clojure.spec.test.alpha :as stest]
 
-(instrument-function-specs)
+    #?(:cljs [cljs.test :refer-macros [is are deftest testing]]
+       :clj
+            [clojure.test :refer :all])))
+
+(stest/instrument `zombie-run.game)
 
 (defn example-game []
   (make-game {:player-pos [2 3]
@@ -101,9 +114,9 @@
 
 (deftest player-weapons-have-different-ranges
   (testing "player weapons have different ranges"
-    (let [game (-> (make-game {:player-pos [4 4]
-                               :world-size [5 5]
-                               :zombies    [[1 1]]
+    (let [game (-> (make-game {:player-pos       [4 4]
+                               :world-size       [5 5]
+                               :zombies          [[1 1]]
                                :player-direction :up-left})
                    (configure-player-weapon (make-weapon :musket))
                    (run-player-action :fire))]
