@@ -50,14 +50,15 @@
 
 (defonce interval (atom nil))
 
+(defonce game-state (reagent/atom nil))
+
 (defn start []
-  (let [game-state (atom nil)]
-    (reset-game game-state)
+  (reset-game game-state)
 
-    (events/removeAll js/document "keydown")
-    (events/listen js/document "keydown" #(handle-keydown game-state %))
+  (events/removeAll js/document "keydown")
+  (events/listen js/document "keydown" #(handle-keydown game-state %))
 
-    (reset! interval (js/setInterval #(run-zombie-actions game-state) 100))))
+  (reset! interval (js/setInterval #(run-zombie-actions game-state) 100)))
 
 (defn stop []
   (when [@interval]
@@ -68,8 +69,11 @@
   (stop)
   (start))
 
+; enable printing to console for debugging
+(enable-console-print!)
+
 ; register reagent rendering
-(reagent/render [view/world]
+(reagent/render [(fn [_] [view/world @game-state])]
                 (js/document.getElementById "app"))
 
 ; register event handling and game loop

@@ -1,4 +1,5 @@
-(ns zombie-run.view)
+(ns zombie-run.view
+  (:require [zombie-run.game :as game]))
 
 (defn make-zombie [[x y]]
   [:rect.zombie
@@ -42,11 +43,17 @@
     :alignment-baseline "central"}
    text])
 
-(defn display-overlay-text [type]
-  (case type
-    :survival (make-overlay-text "You survived!")
-    :death (make-overlay-text "You are dead!")
-    nil))
+(defn display-overlay-text [game-state]
+  (cond (nil? (game/player-health game-state)) (make-overlay-text "You are dead!")
+        (empty? (game/zombie-positions game-state)) (make-overlay-text "You survived!")
+        :else nil))
+
+(defn display-zombies [game-state]
+  (mapcat #(into [(make-zombie %)]
+                 (make-blood %
+                             game/zombie-default-health
+                             (game/zombie-health game-state %)))
+          (game/zombie-positions game-state)))
 
 (defn make-health-text [health]
   [:text.bar
@@ -65,18 +72,23 @@
    [:tspan {:x 50 :y 2} "Move in the direction of a zombie"]
    [:tspan {:x 50 :y 4} "and press <f> to fire!"]])
 
-(defn world []
+(defn world [game-state]
   [:div
    (into
      [:svg.world
       {:view-box "0 0 100 100"}]
      (mapcat identity
-             [[(make-health-text 5)
+             [[(when-let [player-health (game/player-health game-state)]
+                 (make-health-text player-health))
+
                (make-fire-tip-text)
-               (display-overlay-text :none)]
-              (into [(make-zombie [2 3])]
-                    (make-blood [2 3] 10 1))
-              (into [(make-zombie [90 20])]
-                    (make-blood [90 20] 10 9))
-              (into [(make-player [15 15])]
-                    (make-blood [15 15] 10 5))]))])
+
+               (display-overlay-text game-state)]
+
+              (when-let [pos (game/player-position game-state)]
+                (into [(make-player pos)]
+                      (make-blood pos
+                                  game/player-default-health
+                                  (game/player-health game-state))))
+
+              (display-zombies game-state)]))])
