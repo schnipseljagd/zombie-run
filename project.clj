@@ -23,6 +23,7 @@
 
   :cljsbuild {
               :builds [{:id       "zombie-run"
+                        :source-paths ["src"]
                         :figwheel true
                         :compiler {:main       "zombie-run.core"
                                    :asset-path "js/out"
