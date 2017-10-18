@@ -33,17 +33,14 @@
    (.-innerHeight js/window)])
 
 (defn reset-game [state]
-  (prn "resetting game state...")
   (reset! state (-> (game/make-game {:world-size (view/->world-size
                                                    (current-window-size))})
                     (game/configure-player-weapon (zombie-run.weapon/make-weapon :musket)))))
 
 (defn run-player-action [state action]
-  (prn (str "player action: " action "..."))
   (swap! state #(game/run-player-action % action)))
 
 (defn run-zombie-actions [state]
-  ;(prn (str "run zombie actions..."))
   (swap! state game/run-zombie-actions))
 
 (defn handle-keydown [game-state e]
@@ -83,8 +80,5 @@
 (defn reset []
   (stop)
   (start))
-
-; enable printing to console for debugging
-(enable-console-print!)
 
 (reset)
