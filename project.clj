@@ -7,7 +7,7 @@
                  [clj-time "0.14.0"]
                  [quil "2.6.0"]
                  [reagent "0.8.0-alpha1"]
-                 [com.andrewmcveigh/cljs-time "0.5.0"]]
+                 [com.andrewmcveigh/cljs-time "0.5.1"]]
 
   :monkeypatch-clojure-test false
 
