@@ -2,7 +2,28 @@
   (:require [zombie-run.game :as game]
             [clojure.string :refer [join]]))
 
-(def world-size [100 100])
+(defn re-size [[orig-width orig-height] [ideal-width ideal-height]]
+  (let [orig-ratio (/ orig-width orig-height)
+        new-ratio (/ ideal-width ideal-height)
+        new-size (if (> orig-ratio new-ratio)
+                   [ideal-width (/ ideal-width orig-ratio)]
+                   [(* ideal-height orig-ratio) ideal-height])]
+    (map int new-size)))
+
+(defn world-x-center [[world-x world-y] x]
+  (let [orig-ratio (/ world-x world-y)]
+    (if (< orig-ratio 1)
+      (* x orig-ratio)
+      x)))
+
+(defn world-y-center [[world-x world-y] y]
+  (let [orig-ratio (/ world-x world-y)]
+    (if (> orig-ratio 1)
+      (/ y orig-ratio)
+      y)))
+
+(defn ->world-size [size]
+  (re-size size [100 100]))
 
 (defn make-zombie [[x y]]
   [:rect.zombie
@@ -38,17 +59,19 @@
                 #(make-blood-drop [(+ x (/ (rand-int 10) 10))
                                    (+ y (/ (rand-int 10) 10))]))))
 
-(defn make-overlay-text [text]
+(defn make-overlay-text [game-state text]
   [:text.overlay
-   {:x                  50
-    :y                  25
+   {:x                  (world-x-center (game/world-size game-state) 50)
+    :y                  (world-y-center (game/world-size game-state) 50)
     :text-anchor        "middle"
     :alignment-baseline "central"}
    text])
 
 (defn display-overlay-text [game-state]
-  (cond (nil? (game/player-health game-state)) (make-overlay-text "You are dead!")
-        (empty? (game/zombie-positions game-state)) (make-overlay-text "You survived!")
+  (cond (nil? (game/player-health game-state)) (make-overlay-text game-state
+                                                                  "You are dead!")
+        (empty? (game/zombie-positions game-state)) (make-overlay-text game-state
+                                                                       "You survived!")
         :else nil))
 
 (defn display-zombies [game-state]
@@ -58,22 +81,26 @@
                              (game/zombie-health game-state %)))
           (game/zombie-positions game-state)))
 
-(defn make-health-text [health]
+(defn make-health-text [game-state health]
   [:text.bar
-   {:x                  1
+   {:x                  (world-x-center (game/world-size game-state) 1)
     :y                  2
     :text-anchor        "left"
     :alignment-baseline "central"}
    (str "Health: " health)])
 
-(defn make-fire-tip-text []
+(defn make-fire-tip-text [game-state]
   [:text.bar
-   {:x                  50
+   {:x                  (world-x-center (game/world-size game-state) 50)
     :y                  2
     :text-anchor        "middle"
     :alignment-baseline "central"}
-   [:tspan {:x 50 :y 2} "Move in the direction of a zombie"]
-   [:tspan {:x 50 :y 4} "and press <f> to fire!"]])
+   [:tspan {:x (world-x-center (game/world-size game-state) 50)
+            :y 2}
+    "Move in the direction of a zombie"]
+   [:tspan {:x (world-x-center (game/world-size game-state) 50)
+            :y 4}
+    "and press <f> to fire!"]])
 
 (defn display-player [game-state]
   (when-let [pos (game/player-position game-state)]
@@ -84,19 +111,19 @@
 
 (defn display-health-text [game-state]
   (when-let [player-health (game/player-health game-state)]
-    (make-health-text player-health)))
+    (make-health-text game-state player-health)))
 
 (defn world [game-state]
   [:div
    (into
      [:svg.world
-      {:view-box (join " " (concat [0 0] world-size))}]
+      {:view-box (join " " (concat [0 0] (game/world-size game-state)))}]
      (concat (display-player game-state)
 
              (display-zombies game-state)
 
              [(display-health-text game-state)
 
-              (make-fire-tip-text)
+              (make-fire-tip-text game-state)
 
               (display-overlay-text game-state)]))])
