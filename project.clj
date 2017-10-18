@@ -7,7 +7,11 @@
                  [clj-time "0.14.0"]
                  [quil "2.6.0"]
                  [reagent "0.8.0-alpha1"]
-                 [com.andrewmcveigh/cljs-time "0.5.1"]]
+                 [com.andrewmcveigh/cljs-time "0.5.1"]
+                 [ring "1.6.2"]
+                 [ring/ring-defaults "0.3.1"]
+                 [bk/ring-gzip "0.2.1"]
+                 [compojure "1.6.0"]]
 
   :monkeypatch-clojure-test false
 
@@ -22,23 +26,38 @@
   :doo {:paths {:phantom "node_modules/phantomjs-bin/bin/linux/x64/phantomjs"}}
 
   :cljsbuild {
-              :builds [{:id       "zombie-run"
+              :builds [{:id           "zombie-run"
                         :source-paths ["src"]
-                        :figwheel true
-                        :compiler {:main       "zombie-run.core"
-                                   :asset-path "js/out"
-                                   :output-to  "resources/public/js/zombie_run.js"
-                                   :output-dir "resources/public/js/out"}}
+                        :figwheel     true
+                        :compiler     {:main                 "zombie-run.core"
+                                       :asset-path           "js/out"
+                                       :output-to            "resources/public/js/zombie_run.js"
+                                       :output-dir           "resources/public/js/out"
+                                       :source-map-timestamp true}}
                        {:id           "test"
                         :source-paths ["test"]
                         :compiler     {:main          zombie-run.runner
                                        :optimizations :none
-                                       :output-to     "resources/public/js/tests/all-tests.js"}}]}
+                                       :output-to     "resources/public/js/tests/all-tests.js"}}
+                       {:id           "min"
+                        :source-paths ["src"]
+                        :jar          true
+                        :compiler     {:main                 zombie-run.core
+                                       :output-to            "resources/public/js/zombie_run.js"
+                                       :output-dir           "target"
+                                       :source-map-timestamp true
+                                       :optimizations        :advanced
+                                       :pretty-print         false}}]}
 
 
-  :profiles {:uberjar {:aot      :all
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]
-                       :main     zombie-run.quil}
+  :profiles {:uberjar {:aot          :all
+                       :jvm-opts     ["-Dclojure.compiler.direct-linking=true"]
+                       :main         zombie-run.server
+                       :source-paths ^:replace ["src"]
+                       :prep-tasks   ["compile" ["cljsbuild" "once" "min"]]
+                       :hooks        []
+                       :omit-source  true}
+
              :dev     {:dependencies [[org.clojure/test.check "0.9.0"]
                                       [figwheel-sidecar "0.5.15-SNAPSHOT"]]
                        :source-paths ["script"]}}

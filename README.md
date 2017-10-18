@@ -2,10 +2,16 @@
 
 A simple zombie shooter
 
-## Usage
+## Usage with quil UI
+
+    lein uberjar zombie-run.quil
+    java -jar target/zombie-run-0.1.0-SNAPSHOT-standalone.jar
+
+## Usage with reagent UI
 
     lein uberjar
     java -jar target/zombie-run-0.1.0-SNAPSHOT-standalone.jar
+    ; open localhost:8080 in your browser
 
 ## Tests
 
