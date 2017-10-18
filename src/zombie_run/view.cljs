@@ -1,14 +1,7 @@
 (ns zombie-run.view
   (:require [zombie-run.game :as game]
-            [clojure.string :refer [join]]))
-
-(defn re-size [[orig-width orig-height] [ideal-width ideal-height]]
-  (let [orig-ratio (/ orig-width orig-height)
-        new-ratio (/ ideal-width ideal-height)
-        new-size (if (> orig-ratio new-ratio)
-                   [ideal-width (/ ideal-width orig-ratio)]
-                   [(* ideal-height orig-ratio) ideal-height])]
-    (map int new-size)))
+            [clojure.string :refer [join]]
+            [util.resize :refer [resize-to-max-size]]))
 
 (defn world-x-center [[world-x world-y] x]
   (let [orig-ratio (/ world-x world-y)]
@@ -23,7 +16,7 @@
       y)))
 
 (defn ->world-size [size]
-  (re-size size [100 100]))
+  (resize-to-max-size size [100 100]))
 
 (defn make-zombie [[x y]]
   [:rect.zombie
