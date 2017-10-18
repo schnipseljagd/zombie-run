@@ -13,6 +13,9 @@
                  [bk/ring-gzip "0.2.1"]
                  [compojure "1.6.0"]]
 
+  :source-paths ["src/clj" "src/cljs" "src/cljc"]
+  :test-paths ["test/clj" "test/cljs" "test/cljc"]
+
   :monkeypatch-clojure-test false
 
   :clean-targets ^{:protect false} [:target-path :compile-path "out" "resources/public/js"]
@@ -27,7 +30,7 @@
 
   :cljsbuild {
               :builds [{:id           "zombie-run"
-                        :source-paths ["src"]
+                        :source-paths ["src/cljs" "src/cljc"]
                         :figwheel     true
                         :compiler     {:main                 "zombie-run.core"
                                        :asset-path           "js/out"
@@ -35,12 +38,12 @@
                                        :output-dir           "resources/public/js/out"
                                        :source-map-timestamp true}}
                        {:id           "test"
-                        :source-paths ["test"]
+                        :source-paths ["test/cljs"]
                         :compiler     {:main          zombie-run.runner
                                        :optimizations :none
                                        :output-to     "resources/public/js/tests/all-tests.js"}}
                        {:id           "min"
-                        :source-paths ["src"]
+                        :source-paths ["src/cljs" "src/cljc"]
                         :jar          true
                         :compiler     {:main                 zombie-run.core
                                        :output-to            "resources/public/js/zombie_run.js"
@@ -53,7 +56,7 @@
   :profiles {:uberjar {:aot          :all
                        :jvm-opts     ["-Dclojure.compiler.direct-linking=true"]
                        :main         zombie-run.server
-                       :source-paths ^:replace ["src"]
+                       :source-paths ^:replace ["src/clj" "src/cljc"]
                        :prep-tasks   ["compile" ["cljsbuild" "once" "min"]]
                        :hooks        []
                        :omit-source  true}
