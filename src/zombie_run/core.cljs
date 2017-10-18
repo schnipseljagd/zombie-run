@@ -28,10 +28,9 @@
    ;; fire
    "f"          :fire})
 
-
 (defn reset-game [state]
   (prn "resetting game state...")
-  (reset! state (-> (game/make-game {:world-size [300 150]})
+  (reset! state (-> (game/make-game {:world-size view/world-size})
                     (game/configure-player-weapon (zombie-run.weapon/make-weapon :musket)))))
 
 (defn run-player-action [state action]
@@ -50,15 +49,17 @@
 
 (defonce interval (atom nil))
 
-(defonce game-state (reagent/atom nil))
-
 (defn start []
-  (reset-game game-state)
+  (let [game-state (reagent/atom nil)]
+    (reset-game game-state)
 
-  (events/removeAll js/document "keydown")
-  (events/listen js/document "keydown" #(handle-keydown game-state %))
+    (reagent/render [(fn [_] [view/world @game-state])]
+                    (js/document.getElementById "app"))
 
-  (reset! interval (js/setInterval #(run-zombie-actions game-state) 100)))
+    (events/removeAll js/document "keydown")
+    (events/listen js/document "keydown" #(handle-keydown game-state %))
+
+    (reset! interval (js/setInterval #(run-zombie-actions game-state) 100))))
 
 (defn stop []
   (when [@interval]
@@ -71,10 +72,6 @@
 
 ; enable printing to console for debugging
 (enable-console-print!)
-
-; register reagent rendering
-(reagent/render [(fn [_] [view/world @game-state])]
-                (js/document.getElementById "app"))
 
 ; register event handling and game loop
 (reset)

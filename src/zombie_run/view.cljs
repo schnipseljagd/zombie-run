@@ -1,5 +1,8 @@
 (ns zombie-run.view
-  (:require [zombie-run.game :as game]))
+  (:require [zombie-run.game :as game]
+            [clojure.string :refer [join]]))
+
+(def world-size [100 100])
 
 (defn make-zombie [[x y]]
   [:rect.zombie
@@ -87,7 +90,7 @@
   [:div
    (into
      [:svg.world
-      {:view-box "0 0 100 100"}]
+      {:view-box (join " " (concat [0 0] world-size))}]
      (concat (display-player game-state)
 
              (display-zombies game-state)
