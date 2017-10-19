@@ -26,8 +26,6 @@
   :figwheel {:css-dirs          ["resources/public/css"]
              :open-file-command "open-in-intellij"}
 
-  :doo {:paths {:phantom "node_modules/phantomjs-bin/bin/linux/x64/phantomjs"}}
-
   :cljsbuild {
               :builds [{:id           "zombie-run"
                         :source-paths ["src/cljs" "src/cljc"]
